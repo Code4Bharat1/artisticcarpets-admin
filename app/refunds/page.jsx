@@ -18,6 +18,7 @@ export default function RefundsPage() {
   const [refunds, setRefunds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -244,59 +245,31 @@ export default function RefundsPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        {!loading && totalPages > 1 && (
-          <div style={styles.pagination}>
-            <div style={styles.pageInfo}>
-              Showing page {page} of {totalPages}
-            </div>
-            <div style={styles.pageControls}>
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="btn btn-secondary"
-                style={styles.pageBtn}
-              >
-                <ChevronLeft size={16} />
-              </button>
-              
-              <div style={styles.pageNumbers}>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) pageNum = i + 1;
-                  else if (page <= 3) pageNum = i + 1;
-                  else if (page >= totalPages - 2) pageNum = totalPages - 4 + i;
-                  else pageNum = page - 2 + i;
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className={`btn ${page === pageNum ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{
-                        ...styles.pageNumberBtn,
-                        ...(page === pageNum ? styles.activePageBtn : {})
-                      }}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="btn btn-secondary"
-                style={styles.pageBtn}
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
+        {/* Simple Pagination */}
+        {!loading && totalCount > 10 && (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-color)", borderTop: "none", borderBottomLeftRadius: "var(--border-radius-md)", borderBottomRightRadius: "var(--border-radius-md)" }}>
+            <button 
+              className="btn btn-secondary"
+              style={{ opacity: page === 1 ? 0.5 : 1 }} 
+              disabled={page === 1} 
+              onClick={() => setPage(p => p - 1)}
+            >
+              Previous
+            </button>
+            <span style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+              Page {page} of {totalPages}
+            </span>
+            <button 
+              className="btn btn-secondary"
+              style={{ opacity: page === totalPages ? 0.5 : 1 }} 
+              disabled={page === totalPages} 
+              onClick={() => setPage(p => p + 1)}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
-
       <style dangerouslySetInnerHTML={{__html: `
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }

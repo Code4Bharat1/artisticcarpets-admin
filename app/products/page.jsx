@@ -12,6 +12,8 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const fetchProducts = async () => {
     try {
@@ -45,8 +47,12 @@ export default function ProductsPage() {
   };
 
   useEffect(() => {
+    setCurrentPage(1);
     fetchProducts();
   }, [statusFilter, searchTerm]);
+
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const paginatedProducts = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) return;
@@ -213,7 +219,7 @@ export default function ProductsPage() {
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
+              {paginatedProducts.map((product) => (
                 <tr key={product._id}>
                   <td>
                     <div style={pageStyles.productCell}>
@@ -276,6 +282,28 @@ export default function ProductsPage() {
             </tbody>
           </table>
         )}
+        
+        {!isLoading && products.length > 10 && (
+          <div style={pageStyles.paginationContainer}>
+            <button 
+              style={{ ...pageStyles.paginationBtn, opacity: currentPage === 1 ? 0.5 : 1 }} 
+              disabled={currentPage === 1} 
+              onClick={() => setCurrentPage(p => p - 1)}
+            >
+              Previous
+            </button>
+            <span style={pageStyles.paginationInfo}>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button 
+              style={{ ...pageStyles.paginationBtn, opacity: currentPage === totalPages ? 0.5 : 1 }} 
+              disabled={currentPage === totalPages} 
+              onClick={() => setCurrentPage(p => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       <style dangerouslySetInnerHTML={{
@@ -298,6 +326,32 @@ const pageStyles = {
   container: {
     display: "flex",
     flexDirection: "column",
+  },
+  paginationContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "16px 24px",
+    borderTop: "1px solid var(--border-color)",
+    backgroundColor: "#ffffff",
+    borderBottomLeftRadius: "12px",
+    borderBottomRightRadius: "12px",
+  },
+  paginationBtn: {
+    padding: "8px 16px",
+    backgroundColor: "#f5f5f5",
+    border: "1px solid #e0e0e0",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#333",
+    transition: "all 0.2s ease"
+  },
+  paginationInfo: {
+    fontSize: "14px",
+    color: "#666",
+    fontWeight: "500"
   },
   pageHeader: {
     display: "flex",

@@ -132,7 +132,7 @@ export default function OrderDetailPage({ params }) {
     if (["cancelled", "refunded"].includes(currentStatus)) return [];
     if (currentStatus === "returned") return ["refunded"];
 
-    const forwardStatuses = ["confirmed", "processing", "shipped", "out_for_delivery", "delivered"];
+    const forwardStatuses = ["shipped", "out_for_delivery", "delivered"];
     const currentIndex = forwardStatuses.indexOf(currentStatus);
     
     let allowed = forwardStatuses.filter((_, i) => currentIndex === -1 || i > currentIndex);
@@ -257,9 +257,21 @@ export default function OrderDetailPage({ params }) {
               <div style={styles.panel} className="glass">
                 <h3 style={styles.panelTitle}>Customer Profile</h3>
                 <div style={styles.customerCard}>
-                  <div style={styles.custInfoLine}><User size={16} style={{ color: "var(--text-muted)" }} /><span style={{ fontWeight: "600" }}>{order.customerSnapshot?.name || "Guest Customer"}</span></div>
-                  <div style={styles.custInfoLine}><Mail size={16} style={{ color: "var(--text-muted)" }} /><span>{order.customerSnapshot?.email || "No email provided"}</span></div>
-                  <div style={styles.custInfoLine}><Phone size={16} style={{ color: "var(--text-muted)" }} /><span>{order.customerSnapshot?.phone || "No phone provided"}</span></div>
+                  <div style={styles.custInfoLine}>
+                    <User size={16} style={{ color: "var(--text-muted)" }} />
+                    <span style={{ fontWeight: "600" }}>
+                      {order.customerSnapshot?.name || 
+                       (order.customer ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() : "Guest Customer")}
+                    </span>
+                  </div>
+                  <div style={styles.custInfoLine}>
+                    <Mail size={16} style={{ color: "var(--text-muted)" }} />
+                    <span>{order.customerSnapshot?.email || order.customer?.email || "No email provided"}</span>
+                  </div>
+                  <div style={styles.custInfoLine}>
+                    <Phone size={16} style={{ color: "var(--text-muted)" }} />
+                    <span>{order.customerSnapshot?.phone || order.customer?.phone || "No phone provided"}</span>
+                  </div>
                 </div>
               </div>
               <div style={styles.panel} className="glass">

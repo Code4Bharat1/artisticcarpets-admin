@@ -314,11 +314,14 @@ export default function OrderDetail() {
               <div style={styles.customerCard}>
                 <div style={styles.custInfoLine}>
                   <User size={16} style={{ color: "var(--text-muted)" }} />
-                  <span style={{ fontWeight: "600" }}>{order.customerSnapshot?.name || "Guest Customer"}</span>
+                  <span style={{ fontWeight: "600" }}>
+                    {order.customerSnapshot?.name || 
+                     (order.customer ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() : "Guest Customer")}
+                  </span>
                 </div>
                 <div style={styles.custInfoLine}>
                   <Mail size={16} style={{ color: "var(--text-muted)" }} />
-                  <span>{order.customerSnapshot?.email || "No email provided"}</span>
+                  <span>{order.customerSnapshot?.email || order.customer?.email || "No email provided"}</span>
                 </div>
                 <div style={styles.custInfoLine}>
                   <Phone size={16} style={{ color: "var(--text-muted)" }} />

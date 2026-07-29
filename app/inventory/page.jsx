@@ -1,12 +1,16 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "../../components/AdminLayout";
-import { Search, Filter, Plus, Package, AlertTriangle, TrendingDown, DollarSign, Download, Upload, X, RefreshCw, Archive, Edit3, Trash2 } from "lucide-react";
+import { Search, Filter, Plus, Package, AlertTriangle, TrendingDown, DollarSign, Download, Upload, X, RefreshCw, Archive, Edit3, Trash2, Warehouse, Box } from "lucide-react";
+import MaterialsTab from "./components/MaterialsTab";
+import AddMaterialModal from "./components/AddMaterialModal";
 
 export default function InventoryPage() {
   const [stats, setStats] = useState(null);
+  const [materialStats, setMaterialStats] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("products");
   
   // Pagination & Filters
   const [page, setPage] = useState(1);
@@ -18,14 +22,92 @@ export default function InventoryPage() {
   // Modals & Drawers
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isAddMaterialModalOpen, setIsAddMaterialModalOpen] = useState(false);
+  const [refreshMaterialTrigger, setRefreshMaterialTrigger] = useState(0);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   
   // Adjust form state
   const [adjustData, setAdjustData] = useState({ quantity: 0, reason: "", costPrice: 0, price: 0, minStockLevel: 5 });
 
+  const fileInputRef = useRef(null);
+
+  const handleImportCSV = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target.result;
+      const lines = text.split("\n").map(l => l.trim()).filter(l => l);
+      if (lines.length < 2) return alert("Invalid CSV format");
+      
+      // Parse header row properly, handling quotes
+      const parseCsvRow = (rowStr) => {
+        const result = [];
+        let cur = "", inQuotes = false;
+        for (let i = 0; i < rowStr.length; i++) {
+          if (rowStr[i] === '"') inQuotes = !inQuotes;
+          else if (rowStr[i] === ',' && !inQuotes) { result.push(cur); cur = ""; }
+          else cur += rowStr[i];
+        }
+        result.push(cur);
+        return result.map(v => v.trim());
+      };
+
+      const headers = parseCsvRow(lines[0]);
+      const skuIndex = headers.findIndex(h => h.includes("SKU"));
+      const stockIndex = headers.findIndex(h => h.includes("Total Stock") || h.includes("Stock"));
+
+      if (skuIndex === -1 || stockIndex === -1) {
+        return alert("CSV must contain SKU and Total Stock columns");
+      }
+
+      const updates = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = parseCsvRow(lines[i]);
+        const sku = row[skuIndex];
+        const stock = parseInt(row[stockIndex], 10);
+        
+        if (sku && !isNaN(stock)) {
+          updates.push({ sku, stock, notes: "CSV Import" });
+        }
+      }
+
+      if (updates.length === 0) return alert("No valid stock updates found");
+
+      try {
+        const res = await fetch("http://127.0.0.1:5000/api/inventory/bulk", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("artistic_carpets_admin_token")}` 
+          },
+          body: JSON.stringify({ updates })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(`Successfully updated ${data.results.filter(r => !r.error).length} products.`);
+          fetchInventory();
+          fetchStats();
+        } else alert(data.message || "Import failed");
+      } catch (err) {
+        alert("Import failed due to server error");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null;
+  };
+
   useEffect(() => {
     fetchStats();
+    fetchMaterialStats();
   }, []);
+
+  useEffect(() => {
+    if (refreshMaterialTrigger > 0) {
+      fetchMaterialStats();
+    }
+  }, [refreshMaterialTrigger]);
 
   useEffect(() => {
     fetchInventory();
@@ -38,6 +120,18 @@ export default function InventoryPage() {
       });
       const data = await res.json();
       if (data.success) setStats(data.stats);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchMaterialStats = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/materials/stats", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("artistic_carpets_admin_token")}` }
+      });
+      const data = await res.json();
+      if (data.success) setMaterialStats(data.stats);
     } catch (err) {
       console.error(err);
     }
@@ -138,123 +232,182 @@ export default function InventoryPage() {
             <p style={styles.subtitle}>Track products, manage stock levels, and monitor inventory value.</p>
           </div>
           <div style={{ display: "flex", gap: "10px" }}>
+            {activeTab === "materials" ? (
+              <button className="btn btn-primary" onClick={() => setIsAddMaterialModalOpen(true)}>
+                <Warehouse size={16} /> Add Material
+              </button>
+            ) : null}
             <button className="btn btn-secondary" onClick={exportCSV}>
               <Download size={16} /> Export CSV
-            </button>
-            <button className="btn btn-primary" onClick={() => alert("Import feature coming soon!")}>
-              <Upload size={16} /> Import
             </button>
           </div>
         </div>
 
         {/* Dashboard Stats */}
         <div style={styles.statsGrid}>
-          <StatCard title="Total Products" value={stats?.total || 0} icon={Package} color="#1E40AF" bgColor="#DBEAFE" />
-          <StatCard title="In Stock" value={stats?.inStock || 0} icon={Package} color="#065F46" bgColor="#D1FAE5" />
-          <StatCard title="Low Stock" value={stats?.lowStock || 0} icon={AlertTriangle} color="#92400E" bgColor="#FEF3C7" />
-          <StatCard title="Out of Stock" value={stats?.outOfStock || 0} icon={TrendingDown} color="#991B1B" bgColor="#FEE2E2" />
-          <StatCard title="Inventory Value" value={`₹${(stats?.inventoryValue || 0).toLocaleString()}`} icon={DollarSign} color="#4C1D95" bgColor="#EDE9FE" />
+          <StatCard 
+            title={activeTab === "products" ? "Total Products" : "Total Materials"} 
+            value={activeTab === "products" ? (stats?.total || 0) : (materialStats?.total || 0)} 
+            icon={activeTab === "products" ? Package : Warehouse} 
+            color="#1E40AF" bgColor="#DBEAFE" 
+            isLoading={activeTab === "products" ? stats === null : materialStats === null}
+          />
+          <StatCard 
+            title={activeTab === "products" ? "In Stock" : "Total Quantity"} 
+            value={activeTab === "products" ? (stats?.inStock || 0) : (materialStats?.totalQuantityString || "0")} 
+            icon={Package} color="#065F46" bgColor="#D1FAE5" 
+            isLoading={activeTab === "products" ? stats === null : materialStats === null}
+          />
+          <StatCard 
+            title="Low Stock" 
+            value={activeTab === "products" ? (stats?.lowStock || 0) : (materialStats?.lowStock || 0)} 
+            icon={AlertTriangle} color="#92400E" bgColor="#FEF3C7" 
+            isLoading={activeTab === "products" ? stats === null : materialStats === null}
+          />
+          <StatCard 
+            title="Out of Stock" 
+            value={activeTab === "products" ? (stats?.outOfStock || 0) : (materialStats?.outOfStock || 0)} 
+            icon={TrendingDown} color="#991B1B" bgColor="#FEE2E2" 
+            isLoading={activeTab === "products" ? stats === null : materialStats === null}
+          />
+          <StatCard 
+            title={activeTab === "products" ? "Inventory Value" : "Stock Value"} 
+            value={`₹${((activeTab === "products" ? stats?.inventoryValue : materialStats?.inventoryValue) || 0).toLocaleString()}`} 
+            icon={DollarSign} color="#4C1D95" bgColor="#EDE9FE" 
+            isLoading={activeTab === "products" ? stats === null : materialStats === null}
+          />
         </div>
 
-        {/* Filters */}
-        <div style={styles.filters}>
-          <div className="search-box" style={{ flex: 1, maxWidth: "400px" }}>
-            <Search size={16} />
-            <input 
-              type="text" 
-              placeholder="Search by product name or SKU..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <select 
-            style={styles.select} 
-            value={statusFilter} 
-            onChange={(e) => setStatusFilter(e.target.value)}
+        {/* Tabs */}
+        <div style={styles.tabsContainer}>
+          <button 
+            style={activeTab === "products" ? { ...styles.tab, ...styles.activeTab } : styles.tab}
+            onClick={() => setActiveTab("products")}
           >
-            <option value="all">All Status</option>
-            <option value="in_stock">In Stock</option>
-            <option value="low_stock">Low Stock</option>
-            <option value="out_of_stock">Out of Stock</option>
-          </select>
+            <Package size={16} /> Products
+          </button>
+          <button 
+            style={activeTab === "materials" ? { ...styles.tab, ...styles.activeTab } : styles.tab}
+            onClick={() => setActiveTab("materials")}
+          >
+            <Box size={16} /> Raw Materials
+          </button>
         </div>
 
-        {/* Inventory Table */}
-        <div style={styles.tableCard}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>SKU</th>
-                <th>Available</th>
-                <th>Reserved</th>
-                <th>Total Stock</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan="8" style={{ textAlign: "center", padding: "20px" }}>Loading...</td></tr>
-              ) : products.map(product => {
-                const available = (product.stock || 0) - (product.reservedStock || 0);
-                const isLow = available > 0 && available <= (product.minimumStock || product.minStockLevel || 5);
-                const isOut = available <= 0;
-                
-                return (
-                  <tr key={product._id}>
-                    <td>
-                      <div style={styles.productCell}>
-                        <img 
-                          src={product.mainImage?.path ? `http://localhost:5000${product.mainImage.path}` : "/placeholder.jpg"} 
-                          alt={product.name} 
-                          style={styles.productImg} 
-                        />
-                        <span style={{ fontWeight: 500 }}>{product.name || product.title}</span>
-                      </div>
-                    </td>
-                    <td style={{ color: "var(--text-muted)", fontSize: "13px" }}>{product.sku || "-"}</td>
-                    <td style={{ fontWeight: 600 }}>{available}</td>
-                    <td style={{ color: "var(--text-muted)" }}>{product.reservedStock || 0}</td>
-                    <td>{product.stock || 0}</td>
-                    <td>₹{(product.price || 0).toLocaleString()}</td>
-                    <td>
-                      {isOut ? (
-                        <span style={{ ...styles.badge, ...styles.badgeRed }}>Out of Stock</span>
-                      ) : isLow ? (
-                        <span style={{ ...styles.badge, ...styles.badgeOrange }}>Low Stock</span>
-                      ) : (
-                        <span style={{ ...styles.badge, ...styles.badgeGreen }}>In Stock</span>
-                      )}
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <button style={styles.actionBtn} onClick={() => openDrawer(product)}>Details</button>
-                        <button style={styles.actionBtn} onClick={() => openAdjustModal(product)}>Adjust</button>
-                      </div>
-                    </td>
+        {activeTab === "products" ? (
+          <div>
+            {/* Filters */}
+            <div style={styles.filterBar}>
+              <div style={styles.filtersWrapper}>
+                <div style={styles.searchBox}>
+                  <Search size={16} style={styles.searchIcon} />
+                  <input 
+                    type="text" 
+                    placeholder="Search by product name or SKU..." 
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    style={styles.searchInput}
+                  />
+                </div>
+                <select 
+                  style={styles.select} 
+                  value={statusFilter} 
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">All Status</option>
+                  <option value="in_stock">In Stock</option>
+                  <option value="low_stock">Low Stock</option>
+                  <option value="out_of_stock">Out of Stock</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Inventory Table */}
+            <div className="table-container">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Available</th>
+                    <th>Reserved</th>
+                    <th>Total Stock</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                )
-              })}
-            </tbody>
-          </table>
-          
-          {/* Pagination */}
-          <div style={styles.pagination}>
-            <button 
-              style={styles.pageBtn} 
-              disabled={page === 1}
-              onClick={() => setPage(p => p - 1)}
-            >Previous</button>
-            <span>Page {page} of {totalPages}</span>
-            <button 
-              style={styles.pageBtn} 
-              disabled={page === totalPages || totalPages === 0}
-              onClick={() => setPage(p => p + 1)}
-            >Next</button>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan="8" style={{ textAlign: "center", padding: "20px" }}>Loading...</td></tr>
+                  ) : products.map(product => {
+                    const available = (product.stock || 0) - (product.reservedStock || 0);
+                    const isLow = available > 0 && available <= (product.minimumStock || product.minStockLevel || 5);
+                    const isOut = available <= 0;
+                    
+                    return (
+                      <tr key={product._id}>
+                        <td>
+                          <div style={styles.productCell}>
+                            <img 
+                              src={product.thumbnail?.path ? (product.thumbnail.path.startsWith("http") ? product.thumbnail.path : `http://localhost:5000${product.thumbnail.path}`) : "/placeholder.jpg"} 
+                              alt={product.title || product.name} 
+                              style={styles.productImg} 
+                            />
+                            <span style={{ fontWeight: 500 }}>{product.name || product.title}</span>
+                          </div>
+                        </td>
+                        <td style={{ color: "var(--text-muted)", fontSize: "13px" }}>{product.sku || "-"}</td>
+                        <td style={{ fontWeight: 600 }}>{available}</td>
+                        <td style={{ color: "var(--text-muted)" }}>{product.reservedStock || 0}</td>
+                        <td>{product.stock || 0}</td>
+                        <td>₹{(product.price || 0).toLocaleString()}</td>
+                        <td>
+                          {isOut ? (
+                            <span style={{ ...styles.badge, ...styles.badgeRed }}>Out of Stock</span>
+                          ) : isLow ? (
+                            <span style={{ ...styles.badge, ...styles.badgeOrange }}>Low Stock</span>
+                          ) : (
+                            <span style={{ ...styles.badge, ...styles.badgeGreen }}>In Stock</span>
+                          )}
+                        </td>
+                        <td>
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <button style={styles.actionBtn} onClick={() => openDrawer(product)}>Details</button>
+                            <button style={styles.actionBtn} onClick={() => openAdjustModal(product)}>Adjust</button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+              
+              {/* Pagination */}
+              {!loading && totalPages > 1 && (
+                <div style={styles.pagination}>
+                  <button 
+                    style={styles.pageBtn} 
+                    disabled={page === 1} 
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </button>
+                  <span style={{ fontSize: "14px", color: "var(--text-muted)" }}>Page {page} of {totalPages}</span>
+                  <button 
+                    style={styles.pageBtn} 
+                    disabled={page === totalPages} 
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <MaterialsTab refreshTrigger={refreshMaterialTrigger} />
+        )}
 
         {/* Adjust Stock Modal */}
         {isAdjustModalOpen && selectedProduct && (
@@ -340,7 +493,7 @@ export default function InventoryPage() {
               </div>
               <div style={styles.drawerBody}>
                 <img 
-                  src={selectedProduct.mainImage?.path ? `http://localhost:5000${selectedProduct.mainImage.path}` : "/placeholder.jpg"} 
+                  src={selectedProduct.thumbnail?.path ? (selectedProduct.thumbnail.path.startsWith("http") ? selectedProduct.thumbnail.path : `http://localhost:5000${selectedProduct.thumbnail.path}`) : "/placeholder.jpg"} 
                   alt={selectedProduct.name} 
                   style={{ width: "100%", height: "200px", objectFit: "cover", borderRadius: "8px", marginBottom: "15px" }} 
                 />
@@ -370,7 +523,6 @@ export default function InventoryPage() {
 
                 <div style={{ marginTop: "30px" }}>
                   <h4 style={{ marginBottom: "15px", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px" }}>Movement History</h4>
-                  {/* Since Movement History is an API call, we would normally fetch it here. For UI purposes, we'll show a placeholder text */}
                   <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>
                     Fetching exact history requires an additional API call to <br/>
                     <code>/api/inventory/movements?productId={selectedProduct._id}</code>.<br/><br/>
@@ -381,15 +533,24 @@ export default function InventoryPage() {
             </div>
           </div>
         )}
-
       </div>
+
+      {isAddMaterialModalOpen && (
+        <AddMaterialModal 
+          onClose={() => setIsAddMaterialModalOpen(false)} 
+          onSave={() => {
+            setRefreshMaterialTrigger(prev => prev + 1);
+            setIsAddMaterialModalOpen(false);
+          }}
+        />
+      )}
     </AdminLayout>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────
 
-function StatCard({ title, value, icon: Icon, color, bgColor }) {
+function StatCard({ title, value, icon: Icon, color, bgColor, isLoading }) {
   return (
     <div style={styles.statCard}>
       <div style={{ ...styles.iconWrapper, backgroundColor: bgColor, color }}>
@@ -397,7 +558,11 @@ function StatCard({ title, value, icon: Icon, color, bgColor }) {
       </div>
       <div>
         <p style={styles.statTitle}>{title}</p>
-        <h3 style={styles.statValue}>{value}</h3>
+        {isLoading ? (
+          <div style={styles.skeleton} />
+        ) : (
+          <h3 style={styles.statValue}>{value}</h3>
+        )}
       </div>
     </div>
   );
@@ -421,10 +586,42 @@ const styles = {
     margin: "0 0 4px 0",
     color: "var(--text-primary)",
   },
+  skeleton: {
+    height: "28px",
+    width: "80px",
+    backgroundColor: "var(--border-color)",
+    borderRadius: "4px",
+    animation: "pulse 1.5s infinite",
+    opacity: 0.7
+  },
   subtitle: {
     margin: 0,
     color: "var(--text-muted)",
     fontSize: "14px",
+  },
+  tabsContainer: {
+    display: "flex",
+    gap: "10px",
+    marginBottom: "20px",
+    borderBottom: "1px solid var(--border-color)",
+    paddingBottom: "10px"
+  },
+  tab: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 16px",
+    background: "transparent",
+    border: "none",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "var(--text-muted)",
+    cursor: "pointer",
+    borderRadius: "6px"
+  },
+  activeTab: {
+    background: "var(--primary-brand)",
+    color: "white",
   },
   statsGrid: {
     display: "grid",
@@ -461,19 +658,12 @@ const styles = {
     fontWeight: "bold",
     color: "var(--text-primary)",
   },
-  filters: {
-    display: "flex",
-    gap: "15px",
-    marginBottom: "20px",
-  },
-  select: {
-    padding: "10px 15px",
-    borderRadius: "8px",
-    border: "1px solid var(--border-color)",
-    backgroundColor: "var(--bg-primary)",
-    color: "var(--text-primary)",
-    outline: "none",
-  },
+  filterBar: { padding: "18px 22px", borderRadius: "var(--border-radius)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "18px", flexWrap: "wrap", marginBottom: "4px", backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow-xs)" },
+  filtersWrapper: { display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap", flex: 1 },
+  searchBox: { position: "relative", flex: 1, display: "flex", alignItems: "center", minWidth: "280px" },
+  searchInput: { width: "100%", backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-color)", borderRadius: "var(--border-radius-sm)", padding: "9px 12px 9px 40px", fontSize: "14px", color: "var(--text-primary)", outline: "none" },
+  searchIcon: { position: "absolute", left: "14px", color: "var(--text-muted)" },
+  select: { border: "none", backgroundColor: "transparent", padding: "9px 30px 9px 12px", fontSize: "13px", outline: "none", cursor: "pointer", borderLeft: "1px solid var(--border-color)" },
   tableCard: {
     backgroundColor: "var(--bg-primary)",
     borderRadius: "12px",
@@ -497,14 +687,15 @@ const styles = {
     backgroundColor: "var(--bg-secondary)",
   },
   badge: {
-    padding: "4px 8px",
+    padding: "4px 10px",
     borderRadius: "20px",
     fontSize: "12px",
-    fontWeight: 500,
+    fontWeight: "600",
+    display: "inline-block",
   },
-  badgeGreen: { backgroundColor: "#D1FAE5", color: "#065F46" },
-  badgeOrange: { backgroundColor: "#FEF3C7", color: "#92400E" },
-  badgeRed: { backgroundColor: "#FEE2E2", color: "#991B1B" },
+  badgeGreen: { color: "var(--success)" },
+  badgeOrange: { color: "var(--warning)" },
+  badgeRed: { color: "var(--danger)" },
   actionBtn: {
     padding: "4px 10px",
     fontSize: "12px",

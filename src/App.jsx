@@ -1,11 +1,11 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Orders from "./pages/Orders";
-import OrderDetail from "./pages/OrderDetail";
-import CmsEditor from "./pages/CmsEditor";
+import Login from "./views/Login";
+import Dashboard from "./views/Dashboard";
+import Orders from "./views/Orders";
+import OrderDetail from "./views/OrderDetail";
+import CmsEditor from "./views/CmsEditor";
 
 export default function App() {
   return (

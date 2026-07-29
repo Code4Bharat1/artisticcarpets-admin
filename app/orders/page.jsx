@@ -39,7 +39,7 @@ export default function OrdersPage() {
       if (data.success) {
         setOrders(data.data || []);
         if (data.pagination) {
-          setTotalPages(data.pagination.pages || 1);
+          setTotalPages(data.pagination.totalPages || 1);
           setTotalCount(data.pagination.total || 0);
         }
       }
@@ -202,8 +202,13 @@ export default function OrdersPage() {
                       {order.orderNumber}
                     </td>
                     <td>
-                      <div style={styles.custName}>{order.customerSnapshot?.name || "Guest Customer"}</div>
-                      <div style={styles.custEmail}>{order.customerSnapshot?.email || "No email"}</div>
+                      <div style={styles.custName}>
+                        {order.customerSnapshot?.name || 
+                         (order.customer ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() : "Guest Customer")}
+                      </div>
+                      <div style={styles.custEmail}>
+                        {order.customerSnapshot?.email || order.customer?.email || "No email"}
+                      </div>
                     </td>
                     <td>
                       <span className={`badge badge-${order.status === "delivered" ? "success" : order.status === "pending" ? "warning" : order.status === "cancelled" ? "danger" : "info"}`}>
@@ -235,14 +240,24 @@ export default function OrdersPage() {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div style={styles.pagination}>
-            <button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1} style={styles.pageBtn}>
-              <ChevronLeft size={16} />
+        {!loading && totalCount > 10 && (
+          <div style={styles.paginationContainer}>
+            <button 
+              onClick={() => setPage((p) => Math.max(p - 1, 1))} 
+              disabled={page === 1} 
+              style={{ ...styles.paginationBtn, opacity: page === 1 ? 0.5 : 1 }}
+            >
+              Previous
             </button>
-            <span style={styles.pageIndicator}>Page {page} of {totalPages}</span>
-            <button onClick={() => setPage((p) => Math.min(p + 1, totalPages))} disabled={page === totalPages} style={styles.pageBtn}>
-              <ChevronRight size={16} />
+            <span style={styles.paginationInfo}>
+              Page {page} of {totalPages}
+            </span>
+            <button 
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages))} 
+              disabled={page === totalPages} 
+              style={{ ...styles.paginationBtn, opacity: page === totalPages ? 0.5 : 1 }}
+            >
+              Next
             </button>
           </div>
         )}
@@ -272,7 +287,7 @@ const styles = {
   custEmail: { fontSize: "12px", color: "var(--text-muted)", marginTop: "1px" },
   loadingState: { padding: "50px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", color: "var(--text-secondary)" },
   noDataState: { padding: "50px", textAlign: "center", color: "var(--text-muted)", fontSize: "14px" },
-  pagination: { display: "flex", alignItems: "center", justifyContent: "center", gap: "16px", marginTop: "28px" },
-  pageIndicator: { fontSize: "13px", color: "var(--text-secondary)", fontWeight: "500" },
-  pageBtn: { display: "flex", alignItems: "center", justifyContent: "center", width: "34px", height: "34px", borderRadius: "var(--border-radius-sm)", backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", color: "var(--text-primary)", cursor: "pointer", transition: "var(--transition-fast)" },
+  paginationContainer: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 24px", borderTop: "1px solid var(--border-color)", backgroundColor: "#ffffff", borderBottomLeftRadius: "12px", borderBottomRightRadius: "12px" },
+  paginationBtn: { padding: "8px 16px", backgroundColor: "#f5f5f5", border: "1px solid #e0e0e0", borderRadius: "6px", cursor: "pointer", fontSize: "14px", fontWeight: "500", color: "#333", transition: "all 0.2s ease" },
+  paginationInfo: { fontSize: "14px", color: "#666", fontWeight: "500" },
 };

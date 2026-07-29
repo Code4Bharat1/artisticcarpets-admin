@@ -123,7 +123,7 @@ export default function RefundDetailPage({ params }) {
                 <div style={styles.infoGrid}>
                   <div style={styles.infoItem}>
                     <p style={styles.infoLabel}>Requested At</p>
-                    <p style={styles.infoValue}>{formatDate(refund?.requestedAt)}</p>
+                    <p style={styles.infoValue}>{formatDate(order.refund?.requestedAt || order.refund?.completedAt || order.createdAt)}</p>
                   </div>
                   <div style={styles.infoItem}>
                     <p style={styles.infoLabel}>Refund Amount</p>
@@ -209,13 +209,13 @@ export default function RefundDetailPage({ params }) {
                           <div style={styles.productCell}>
                             <img src={item.image || "/placeholder.jpg"} alt={item.title} style={styles.productImg} />
                             <div>
-                              <p style={styles.productTitle}>{item.title}</p>
+                              <p style={styles.productTitle}>{item.name || item.title || "Unknown Product"}</p>
                               {item.sku && <p style={styles.productSku}>SKU: {item.sku}</p>}
                             </div>
                           </div>
                         </td>
                         <td style={styles.td}>{item.quantity}</td>
-                        <td style={styles.td}>{formatCurrency(item.price)}</td>
+                        <td style={styles.td}>{formatCurrency(item.unitPrice || item.price || 0)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -293,9 +293,12 @@ export default function RefundDetailPage({ params }) {
                 </div>
               </div>
             </div>
+            
 
           </div>
+          
         </div>
+        
       </div>
       
       <style dangerouslySetInnerHTML={{__html: `

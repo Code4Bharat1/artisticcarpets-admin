@@ -186,8 +186,13 @@ export default function Orders() {
                     {order.orderNumber}
                   </td>
                   <td>
-                    <div style={styles.custName}>{order.customerSnapshot?.name || "Guest Customer"}</div>
-                    <div style={styles.custEmail}>{order.customerSnapshot?.email || "No email"}</div>
+                    <div style={styles.custName}>
+                      {order.customerSnapshot?.name || 
+                       (order.customer ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() : "Guest Customer")}
+                    </div>
+                    <div style={styles.custEmail}>
+                      {order.customerSnapshot?.email || order.customer?.email || "No email"}
+                    </div>
                   </td>
                   <td>
                     <span className={`badge badge-${
