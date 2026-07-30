@@ -375,7 +375,7 @@ const styles = {
   tabsRow: { display: "flex", flexDirection: "row", gap: "10px", padding: "12px 16px", borderRadius: "var(--border-radius)", backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow-xs)", overflowX: "auto", alignItems: "center" },
   tabBtn: { display: "flex", alignItems: "center", gap: "8px", padding: "10px 18px", borderRadius: "var(--border-radius-sm)", color: "var(--text-secondary)", backgroundColor: "transparent", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: "500", transition: "var(--transition-fast)", whiteSpace: "nowrap" },
   tabBtnActive: { backgroundColor: "var(--primary-brand-light)", color: "var(--primary-brand)", fontWeight: "600" },
-  workspaceCol: { flex: "1 1 400px", minWidth: "300px" },
+  workspaceCol: { flex: "1 1 400px", minWidth: "280px" },
   loadingWS: { height: "280px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", color: "var(--text-secondary)" },
   wsPanel: { padding: "28px", borderRadius: "var(--border-radius)", backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow-sm)" },
   wsPanelHeader: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--border-color)", paddingBottom: "18px", marginBottom: "20px" },
@@ -395,7 +395,7 @@ const styles = {
   lockedTitle: { fontSize: "20px", fontWeight: "600", marginBottom: "10px" },
   lockedDesc: { fontSize: "14px", color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "20px" },
   lockBadge: { padding: "5px 12px", backgroundColor: "var(--primary-brand-light)", border: "1px solid rgba(108, 29, 27, 0.2)", borderRadius: "4px", fontSize: "11px", fontWeight: "700", color: "var(--primary-brand)", letterSpacing: "0.05em" },
-  previewCol: { flex: "1 1 350px", minWidth: "300px", borderRadius: "var(--border-radius)", border: "1px solid var(--border-color)", overflow: "hidden", display: "flex", flexDirection: "column", backgroundColor: "var(--bg-secondary)", boxShadow: "var(--shadow-sm)" },
+  previewCol: { flex: "1 1 350px", minWidth: "280px", borderRadius: "var(--border-radius)", border: "1px solid var(--border-color)", overflow: "hidden", display: "flex", flexDirection: "column", backgroundColor: "var(--bg-secondary)", boxShadow: "var(--shadow-sm)" },
   previewHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", backgroundColor: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-color)" },
   refreshBtn: { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", cursor: "pointer", color: "var(--primary-brand)", fontSize: "12px", fontWeight: "600", transition: "var(--transition-fast)" },
   iframe: { flex: 1, width: "100%", border: "none", backgroundColor: "#fff" }
