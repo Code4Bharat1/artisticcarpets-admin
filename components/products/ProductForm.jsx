@@ -130,7 +130,8 @@ export default function ProductForm({ initialData = null }) {
         });
       }
 
-      const url = isEditing ? `/admin/api/products/${initialData._id}` : `/admin/api/products`;
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const url = isEditing ? `${baseUrl}/products/${initialData._id}` : `${baseUrl}/products`;
       const method = isEditing ? "PUT" : "POST";
 
       const res = await fetch(url, {

@@ -17,7 +17,8 @@ export default function EditProductPage({ params }) {
     const fetchProduct = async () => {
       try {
         const token = localStorage.getItem("artistic_carpets_admin_token");
-        const res = await fetch(`/admin/api/products/${id}`, {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res = await fetch(`${baseUrl}/products/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

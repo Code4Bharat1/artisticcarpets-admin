@@ -20,7 +20,8 @@ export default function ProductsPage() {
       setIsLoading(true);
       setError(null);
       // Construct query string based on filters
-      let url = "/admin/api/products/admin-list?limit=100";
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      let url = `${baseUrl}/products/admin-list?limit=100`;
       if (statusFilter !== "all") {
         url += `&status=${statusFilter}`;
       }
@@ -60,7 +61,8 @@ export default function ProductsPage() {
     try {
       setActionLoading(id);
       const token = localStorage.getItem("artistic_carpets_admin_token");
-      const res = await fetch(`/admin/api/products/${id}`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/products/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`
@@ -86,7 +88,8 @@ export default function ProductsPage() {
     try {
       setActionLoading(id);
       const token = localStorage.getItem("artistic_carpets_admin_token");
-      const res = await fetch(`/admin/api/products/${id}/${action}`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/products/${id}/${action}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`
