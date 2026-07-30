@@ -128,6 +128,39 @@ export default function CmsEditorPage() {
   const handleAddArticle = () => setJournalArticles([...journalArticles, { id: `art-${Date.now()}`, category: "EDITORIAL", title: "New Journal Article Title", snippet: "Short summary snippet...", image: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=400&q=80", date: new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }), readTime: "4 min read" }]);
   const handleRemoveArticle = (index) => { if (!window.confirm("Remove this article?")) return; setJournalArticles(journalArticles.filter((_, i) => i !== index)); };
 
+  const handleUploadImage = async (e, index, field, type) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setSaving(true);
+      const token = localStorage.getItem("artistic_carpets_admin_token");
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "cms");
+
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/media`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (res.ok && data.data?.files?.[0]?.url) {
+        const url = data.data.files[0].url;
+        if (type === "collection") handleCollectionChange(index, field, url);
+        else if (type === "journal") handleArticleChange(index, field, url);
+      } else {
+        alert(data.message || "Failed to upload image");
+      }
+    } catch (err) {
+      alert("Error uploading image");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleProductToggle = (productId) => {
     if (highlightsProducts.includes(productId)) {
       setHighlightsProducts(highlightsProducts.filter(id => id !== productId));
@@ -217,11 +250,20 @@ export default function CmsEditorPage() {
                         <div key={col.id || index} style={styles.cmsRowCard}>
                           <div style={styles.cardIndexHeader}><span style={styles.cardIndexNumber}>Collection #{index + 1}</span><button onClick={() => handleRemoveCollection(index)} style={styles.trashBtn}><Trash2 size={15} /></button></div>
                           <div style={styles.cardInputsGrid}>
-                            <div className="form-group"><label className="form-label">Name</label><input type="text" value={col.name || ""} onChange={(e) => handleCollectionChange(index, "name", e.target.value)} className="form-input" /></div>
-                            <div className="form-group"><label className="form-label">Product Count Tag</label><input type="text" value={col.count || ""} onChange={(e) => handleCollectionChange(index, "count", e.target.value)} className="form-input" /></div>
-                            <div className="form-group" style={{ gridColumn: "span 2" }}><label className="form-label">Image URL</label><input type="text" value={col.image || ""} onChange={(e) => handleCollectionChange(index, "image", e.target.value)} className="form-input" /></div>
-                            <div className="form-group"><label className="form-label">Link</label><input type="text" value={col.link || ""} onChange={(e) => handleCollectionChange(index, "link", e.target.value)} className="form-input" /></div>
-                            <div className="form-group" style={{ gridColumn: "span 3" }}><label className="form-label">Description</label><input type="text" value={col.description || ""} onChange={(e) => handleCollectionChange(index, "description", e.target.value)} className="form-input" /></div>
+                            <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Name</label><input type="text" value={col.name || ""} onChange={(e) => handleCollectionChange(index, "name", e.target.value)} className="form-input" /></div>
+                            <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Product Count Tag</label><input type="text" value={col.count || ""} onChange={(e) => handleCollectionChange(index, "count", e.target.value)} className="form-input" /></div>
+                            <div className="form-group" style={{ gridColumn: "span 2", minWidth: 0 }}>
+                              <label className="form-label">Image URL</label>
+                              <div style={{ display: "flex", gap: "8px" }}>
+                                <input type="text" value={col.image || ""} onChange={(e) => handleCollectionChange(index, "image", e.target.value)} className="form-input" style={{ flex: 1, minWidth: 0 }} />
+                                <label className="btn btn-secondary" style={{ padding: "8px 12px", fontSize: "12px", cursor: "pointer", whiteSpace: "nowrap" }}>
+                                  Upload
+                                  <input type="file" style={{ display: "none" }} accept="image/*" onChange={(e) => handleUploadImage(e, index, "image", "collection")} />
+                                </label>
+                              </div>
+                            </div>
+                            <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Link</label><input type="text" value={col.link || ""} onChange={(e) => handleCollectionChange(index, "link", e.target.value)} className="form-input" /></div>
+                            <div className="form-group" style={{ gridColumn: "span 3", minWidth: 0 }}><label className="form-label">Description</label><input type="text" value={col.description || ""} onChange={(e) => handleCollectionChange(index, "description", e.target.value)} className="form-input" /></div>
                           </div>
                         </div>
                       ))}
@@ -303,12 +345,21 @@ export default function CmsEditorPage() {
                         <div key={art.id || index} style={styles.cmsRowCard}>
                           <div style={styles.cardIndexHeader}><span style={styles.cardIndexNumber}>Article #{index + 1}</span><button onClick={() => handleRemoveArticle(index)} style={styles.trashBtn}><Trash2 size={15} /></button></div>
                           <div style={styles.cardInputsGrid}>
-                            <div className="form-group"><label className="form-label">Category / Tag</label><input type="text" value={art.category || ""} onChange={(e) => handleArticleChange(index, "category", e.target.value)} className="form-input" placeholder="e.g. HERITAGE" /></div>
-                            <div className="form-group" style={{ gridColumn: "span 2" }}><label className="form-label">Title</label><input type="text" value={art.title || ""} onChange={(e) => handleArticleChange(index, "title", e.target.value)} className="form-input" /></div>
-                            <div className="form-group" style={{ gridColumn: "span 3" }}><label className="form-label">Cover Image URL</label><input type="text" value={art.image || ""} onChange={(e) => handleArticleChange(index, "image", e.target.value)} className="form-input" /></div>
-                            <div className="form-group"><label className="form-label">Read Time</label><input type="text" value={art.readTime || ""} onChange={(e) => handleArticleChange(index, "readTime", e.target.value)} className="form-input" placeholder="e.g. 5 min read" /></div>
-                            <div className="form-group"><label className="form-label">Date Display</label><input type="text" value={art.date || ""} onChange={(e) => handleArticleChange(index, "date", e.target.value)} className="form-input" /></div>
-                            <div className="form-group" style={{ gridColumn: "span 3" }}><label className="form-label">Snippet</label><textarea value={art.snippet || ""} onChange={(e) => handleArticleChange(index, "snippet", e.target.value)} className="form-input" rows={2} style={{ resize: "none" }} /></div>
+                            <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Category / Tag</label><input type="text" value={art.category || ""} onChange={(e) => handleArticleChange(index, "category", e.target.value)} className="form-input" placeholder="e.g. HERITAGE" /></div>
+                            <div className="form-group" style={{ gridColumn: "span 2", minWidth: 0 }}><label className="form-label">Title</label><input type="text" value={art.title || ""} onChange={(e) => handleArticleChange(index, "title", e.target.value)} className="form-input" /></div>
+                            <div className="form-group" style={{ gridColumn: "span 3", minWidth: 0 }}>
+                              <label className="form-label">Cover Image URL</label>
+                              <div style={{ display: "flex", gap: "8px" }}>
+                                <input type="text" value={art.image || ""} onChange={(e) => handleArticleChange(index, "image", e.target.value)} className="form-input" style={{ flex: 1, minWidth: 0 }} />
+                                <label className="btn btn-secondary" style={{ padding: "8px 12px", fontSize: "12px", cursor: "pointer", whiteSpace: "nowrap" }}>
+                                  Upload
+                                  <input type="file" style={{ display: "none" }} accept="image/*" onChange={(e) => handleUploadImage(e, index, "image", "journal")} />
+                                </label>
+                              </div>
+                            </div>
+                            <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Read Time</label><input type="text" value={art.readTime || ""} onChange={(e) => handleArticleChange(index, "readTime", e.target.value)} className="form-input" placeholder="e.g. 5 min read" /></div>
+                            <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Date Display</label><input type="text" value={art.date || ""} onChange={(e) => handleArticleChange(index, "date", e.target.value)} className="form-input" /></div>
+                            <div className="form-group" style={{ gridColumn: "span 3", minWidth: 0 }}><label className="form-label">Snippet</label><textarea value={art.snippet || ""} onChange={(e) => handleArticleChange(index, "snippet", e.target.value)} className="form-input" rows={2} style={{ resize: "none" }} /></div>
                           </div>
                         </div>
                       ))}
