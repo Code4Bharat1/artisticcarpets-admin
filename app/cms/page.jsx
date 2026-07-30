@@ -352,7 +352,7 @@ export default function CmsEditorPage() {
               <iframe 
                 key={refreshKey}
                 id="previewIframe"
-                src={`${process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000"}#${activeTab}`} 
+                src={`${process.env.NEXT_PUBLIC_FRONTEND_URL || "https://aartisticcarpets.nexcorealliance.com"}#${activeTab}`} 
                 style={styles.iframe} 
                 title="Website Preview"
               />
@@ -389,7 +389,7 @@ const styles = {
   cardIndexNumber: { fontSize: "12px", fontWeight: "700", color: "var(--primary-brand)", textTransform: "uppercase", letterSpacing: "0.04em" },
   trashBtn: { backgroundColor: "transparent", border: "none", color: "var(--color-danger)", cursor: "pointer", padding: "4px", transition: "var(--transition-fast)" },
   iconBtn: { backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", borderRadius: "4px", cursor: "pointer", padding: "2px 8px", fontSize: "12px", color: "var(--text-secondary)", transition: "var(--transition-fast)" },
-  cardInputsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px 18px" },
+  cardInputsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px 18px" },
   infoInfoBox: { display: "flex", alignItems: "center", gap: "12px", backgroundColor: "rgba(29, 78, 216, 0.06)", border: "1px solid rgba(29, 78, 216, 0.18)", borderRadius: "var(--border-radius-sm)", padding: "13px 16px", marginTop: "24px", fontSize: "13px", color: "var(--color-info)", lineHeight: "1.4" },
   lockedContainer: { padding: "48px 32px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", maxWidth: "460px", margin: "0 auto" },
   lockedTitle: { fontSize: "20px", fontWeight: "600", marginBottom: "10px" },

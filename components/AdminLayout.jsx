@@ -33,6 +33,16 @@ export default function AdminLayout({ children }) {
     }
   }, [router]);
 
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (isNotificationOpen && !e.target.closest('.notification-bell')) {
+        setIsNotificationOpen(false);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, [isNotificationOpen]);
+
   // Prevent hydration mismatch by rendering nothing until mounted on client
   if (!mounted) return null;
 
