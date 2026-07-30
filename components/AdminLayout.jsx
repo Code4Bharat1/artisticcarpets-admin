@@ -55,12 +55,11 @@ export default function AdminLayout({ children }) {
     if (pathname === "/orders") return "Orders Management";
     if (pathname.startsWith("/products")) return "Products Management";
     if (pathname === "/cms") return "Content Management";
-    if (pathname === "/refunds") return "Refund Management";
     if (pathname.startsWith("/complaints")) return "Support Complaints";
     return "Admin Dashboard";
   };
 
-  const hideTitleOnMobile = pathname === "/orders" || pathname.startsWith("/products") || pathname.startsWith("/inventory") || pathname === "/refunds" || pathname.startsWith("/complaints") || pathname === "/cms";
+  const hideTitleOnMobile = pathname === "/orders" || pathname.startsWith("/products") || pathname.startsWith("/inventory") || pathname.startsWith("/complaints") || pathname === "/cms";
 
   return (
     <div className="admin-layout">

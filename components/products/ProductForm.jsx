@@ -311,44 +311,6 @@ export default function ProductForm({ initialData = null }) {
             </div>
           </div>
           
-
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Refund Policy</h3>
-            <div style={styles.checkboxGroup}>
-              <input type="checkbox" id="refundPolicyEnabled" name="refundPolicyEnabled" checked={formData.refundPolicyEnabled} onChange={handleChange} />
-              <label htmlFor="refundPolicyEnabled" style={{ cursor: "pointer" }}>Enable Refunds for this product</label>
-            </div>
-            {formData.refundPolicyEnabled && (
-              <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Refund Window (Days)</label>
-                  <input type="number" name="refundPolicyRefundWindow" value={formData.refundPolicyRefundWindow} onChange={handleChange} style={styles.input} min="0" />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Refund Policy Description</label>
-                  <textarea name="refundPolicyDescription" value={formData.refundPolicyDescription} onChange={handleChange} style={{...styles.input, height: "80px"}} />
-                </div>
-                <div style={styles.checkboxGroup}>
-                  <input type="checkbox" id="refundPolicyReasonRequired" name="refundPolicyReasonRequired" checked={formData.refundPolicyReasonRequired} onChange={handleChange} />
-                  <label htmlFor="refundPolicyReasonRequired" style={{ cursor: "pointer" }}>Reason Required for Refund</label>
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Return Shipping Responsibility</label>
-                  <select name="refundPolicyShippingResponsibility" value={formData.refundPolicyShippingResponsibility} onChange={handleChange} style={styles.input}>
-                    <option value="Customer">Customer</option>
-                    <option value="Seller">Seller</option>
-                  </select>
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Required Product Condition</label>
-                  <select name="refundPolicyRequiredCondition" value={formData.refundPolicyRequiredCondition} onChange={handleChange} style={styles.input}>
-                    <option value="Unused">Unused</option>
-                    <option value="Original Packaging">Original Packaging</option>
-                    <option value="Damaged Accepted">Damaged Accepted (Optional)</option>
-                  </select>
-                </div>
-              </div>
-            )}
           </div>
   
         </div>

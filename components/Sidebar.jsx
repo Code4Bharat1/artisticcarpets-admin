@@ -28,7 +28,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { href: "/orders", label: "Orders", icon: ShoppingBag },
     { href: "/products", label: "Products", icon: Package },
     { href: "/inventory", label: "Inventory", icon: Warehouse },
-    { href: "/refunds", label: "Refunds", icon: RefreshCw },
     { href: "/complaints", label: "Support", icon: HelpCircle },
     { href: "/cms", label: "CMS Editor", icon: FileText },
   ];
