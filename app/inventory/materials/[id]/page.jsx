@@ -16,6 +16,7 @@ export default function MaterialDetailsPage() {
 
   const fetchMaterialDetails = async () => {
     setLoading(true);
+    try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
       const res = await fetch(`${baseUrl}/materials/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("artistic_carpets_admin_token")}` }
