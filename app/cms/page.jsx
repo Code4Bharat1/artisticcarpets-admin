@@ -253,16 +253,15 @@ export default function CmsEditorPage() {
                             <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Name</label><input type="text" value={col.name || ""} onChange={(e) => handleCollectionChange(index, "name", e.target.value)} className="form-input" /></div>
                             <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Product Count Tag</label><input type="text" value={col.count || ""} onChange={(e) => handleCollectionChange(index, "count", e.target.value)} className="form-input" /></div>
                             <div className="form-group" style={{ gridColumn: "span 2", minWidth: 0 }}>
-                              <label className="form-label">Image URL</label>
-                              <div style={{ display: "flex", gap: "8px" }}>
-                                <input type="text" value={col.image || ""} onChange={(e) => handleCollectionChange(index, "image", e.target.value)} className="form-input" style={{ flex: 1, minWidth: 0 }} />
-                                <label className="btn btn-secondary" style={{ padding: "8px 12px", fontSize: "12px", cursor: "pointer", whiteSpace: "nowrap" }}>
-                                  Upload
+                              <label className="form-label">Image</label>
+                              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                                {col.image && <img src={col.image} alt="Collection" style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px" }} />}
+                                <label className="btn btn-secondary" style={{ padding: "8px 12px", fontSize: "12px", cursor: "pointer", whiteSpace: "nowrap", margin: 0 }}>
+                                  {col.image ? "Change Image" : "Upload Image"}
                                   <input type="file" style={{ display: "none" }} accept="image/*" onChange={(e) => handleUploadImage(e, index, "image", "collection")} />
                                 </label>
                               </div>
                             </div>
-                            <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Link</label><input type="text" value={col.link || ""} onChange={(e) => handleCollectionChange(index, "link", e.target.value)} className="form-input" /></div>
                             <div className="form-group" style={{ gridColumn: "span 3", minWidth: 0 }}><label className="form-label">Description</label><input type="text" value={col.description || ""} onChange={(e) => handleCollectionChange(index, "description", e.target.value)} className="form-input" /></div>
                           </div>
                         </div>
@@ -348,11 +347,11 @@ export default function CmsEditorPage() {
                             <div className="form-group" style={{ minWidth: 0 }}><label className="form-label">Category / Tag</label><input type="text" value={art.category || ""} onChange={(e) => handleArticleChange(index, "category", e.target.value)} className="form-input" placeholder="e.g. HERITAGE" /></div>
                             <div className="form-group" style={{ gridColumn: "span 2", minWidth: 0 }}><label className="form-label">Title</label><input type="text" value={art.title || ""} onChange={(e) => handleArticleChange(index, "title", e.target.value)} className="form-input" /></div>
                             <div className="form-group" style={{ gridColumn: "span 3", minWidth: 0 }}>
-                              <label className="form-label">Cover Image URL</label>
-                              <div style={{ display: "flex", gap: "8px" }}>
-                                <input type="text" value={art.image || ""} onChange={(e) => handleArticleChange(index, "image", e.target.value)} className="form-input" style={{ flex: 1, minWidth: 0 }} />
-                                <label className="btn btn-secondary" style={{ padding: "8px 12px", fontSize: "12px", cursor: "pointer", whiteSpace: "nowrap" }}>
-                                  Upload
+                              <label className="form-label">Cover Image</label>
+                              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                                {art.image && <img src={art.image} alt="Cover" style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px" }} />}
+                                <label className="btn btn-secondary" style={{ padding: "8px 12px", fontSize: "12px", cursor: "pointer", whiteSpace: "nowrap", margin: 0 }}>
+                                  {art.image ? "Change Image" : "Upload Image"}
                                   <input type="file" style={{ display: "none" }} accept="image/*" onChange={(e) => handleUploadImage(e, index, "image", "journal")} />
                                 </label>
                               </div>
