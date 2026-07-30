@@ -280,7 +280,7 @@ export default function RefundsPage() {
 
 const styles = {
   container: { padding: "24px", maxWidth: "1200px", margin: "0 auto" },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px", marginBottom: "24px" },
   title: { fontSize: "24px", fontWeight: "700", color: "var(--text-primary)", margin: "0 0 8px 0" },
   subtitle: { color: "var(--text-secondary)", margin: 0, fontSize: "14px" },
   refreshBtn: { display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px" },

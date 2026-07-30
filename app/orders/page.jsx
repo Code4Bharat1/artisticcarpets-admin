@@ -203,8 +203,8 @@ export default function OrdersPage() {
                     </td>
                     <td>
                       <div style={styles.custName}>
-                        {order.customerSnapshot?.name || 
-                         (order.customer ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() : "Guest Customer")}
+                        {order.customerSnapshot?.name ||
+                          (order.customer ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() : "Guest Customer")}
                       </div>
                       <div style={styles.custEmail}>
                         {order.customerSnapshot?.email || order.customer?.email || "No email"}
@@ -242,9 +242,9 @@ export default function OrdersPage() {
         {/* Pagination */}
         {!loading && totalCount > 10 && (
           <div style={styles.paginationContainer}>
-            <button 
-              onClick={() => setPage((p) => Math.max(p - 1, 1))} 
-              disabled={page === 1} 
+            <button
+              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              disabled={page === 1}
               style={{ ...styles.paginationBtn, opacity: page === 1 ? 0.5 : 1 }}
             >
               Previous
@@ -252,9 +252,9 @@ export default function OrdersPage() {
             <span style={styles.paginationInfo}>
               Page {page} of {totalPages}
             </span>
-            <button 
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages))} 
-              disabled={page === totalPages} 
+            <button
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              disabled={page === totalPages}
               style={{ ...styles.paginationBtn, opacity: page === totalPages ? 0.5 : 1 }}
             >
               Next
@@ -268,7 +268,7 @@ export default function OrdersPage() {
 
 const styles = {
   container: { display: "flex", flexDirection: "column" },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap", marginBottom: "28px" },
   title: { fontSize: "28px", fontWeight: "700" },
   subtitle: { fontSize: "14px", color: "var(--text-secondary)", marginTop: "2px" },
   refreshBtn: { padding: "9px 15px", fontSize: "13px" },

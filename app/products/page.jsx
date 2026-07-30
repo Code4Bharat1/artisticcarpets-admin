@@ -156,17 +156,17 @@ export default function ProductsPage() {
 
       {/* Filter and Search Bar */}
       <div style={pageStyles.filterBar}>
-        <div style={pageStyles.filters}>
-          <div style={pageStyles.searchBox}>
-            <Search size={16} style={pageStyles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={pageStyles.searchInput}
-            />
-          </div>
+        <div style={pageStyles.searchBox}>
+          <Search size={16} style={pageStyles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={pageStyles.searchInput}
+          />
+        </div>
+        <div style={pageStyles.actionGroup}>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -177,11 +177,11 @@ export default function ProductsPage() {
             <option value="draft">Draft</option>
             <option value="archived">Archived</option>
           </select>
+          <Link href="/products/new" style={pageStyles.addButton}>
+            <Plus size={15} />
+            <span className="hidden sm:inline" style={{ marginLeft: "4px" }}>Add Product</span>
+          </Link>
         </div>
-        <Link href="/products/new" style={pageStyles.addButton}>
-          <Plus size={15} />
-          <span>Add Product</span>
-        </Link>
       </div>
 
       {/* Error State */}
@@ -336,6 +336,8 @@ const pageStyles = {
     backgroundColor: "#ffffff",
     borderBottomLeftRadius: "12px",
     borderBottomRightRadius: "12px",
+    flexWrap: "wrap",
+    gap: "12px",
   },
   paginationBtn: {
     padding: "8px 16px",
@@ -358,17 +360,17 @@ const pageStyles = {
     justifyContent: "space-between",
     alignItems: "center",
   },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap", marginBottom: "28px" },
   title: { fontSize: "28px", fontWeight: "700" },
   subtitle: { fontSize: "14px", color: "var(--text-secondary)", marginTop: "2px" },
   refreshBtn: { padding: "9px 15px", fontSize: "13px" },
   filterBar: { padding: "18px 22px", borderRadius: "var(--border-radius)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "18px", flexWrap: "wrap", marginBottom: "4px", backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow-xs)" },
-  filters: { display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap", flex: 1 },
-  searchBox: { position: "relative", flex: 1, display: "flex", alignItems: "center", minWidth: "280px" },
+  actionGroup: { display: "flex", gap: "12px", alignItems: "center", flexWrap: "nowrap", flex: "0 0 auto", overflowX: "auto" },
+  searchBox: { position: "relative", flex: "1 1 auto", display: "flex", alignItems: "center", minWidth: "200px" },
   searchInput: { width: "100%", backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-color)", borderRadius: "var(--border-radius-sm)", padding: "9px 12px 9px 40px", fontSize: "14px", color: "var(--text-primary)", outline: "none" },
   searchIcon: { position: "absolute", left: "14px", color: "var(--text-muted)" },
-  select: { border: "none", backgroundColor: "transparent", padding: "9px 30px 9px 12px", fontSize: "13px", outline: "none", cursor: "pointer", borderLeft: "1px solid var(--border-color)" },
-  addButton: { padding: "9px 16px", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: "var(--primary-brand)", color: "white", borderRadius: "var(--border-radius-sm)", textDecoration: "none", fontWeight: "500", transition: "var(--transition-fast)" },
+  select: { border: "1px solid var(--border-color)", borderRadius: "var(--border-radius-sm)", backgroundColor: "var(--bg-primary)", padding: "9px 30px 9px 12px", fontSize: "13px", outline: "none", cursor: "pointer" },
+  addButton: { padding: "9px 16px", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: "var(--primary-brand)", color: "white", borderRadius: "var(--border-radius-sm)", textDecoration: "none", fontWeight: "500", transition: "var(--transition-fast)", whiteSpace: "nowrap" },
 
   productCell: {
     display: "flex",

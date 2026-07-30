@@ -140,6 +140,24 @@ export default function CmsEditorPage() {
     }
   };
 
+  const handleToggleBestSeller = async (productId, currentStatus) => {
+    try {
+      const formData = new FormData();
+      formData.append("isBestSeller", !currentStatus);
+      const data = await apiRequest.put(`/products/${productId}`, formData);
+      if (data.success) {
+        setAvailableProducts(availableProducts.map(p => 
+          p._id === productId ? { ...p, isBestSeller: !currentStatus } : p
+        ));
+        setSuccess(`Product best seller status updated.`);
+        setTimeout(() => setSuccess(""), 4000);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update best seller status.");
+      setTimeout(() => setError(""), 4000);
+    }
+  };
+
   return (
     <AdminLayout>
       <div style={styles.container}>
@@ -174,7 +192,7 @@ export default function CmsEditorPage() {
           </div>
 
           {/* Bottom: Split Workspace and Preview */}
-          <div style={{ display: "flex", gap: "24px", alignItems: "stretch", minHeight: "800px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "stretch", minHeight: "800px" }}>
             {/* Left: Workspace Forms */}
             <div style={styles.workspaceCol}>
               {loading ? (
@@ -243,13 +261,29 @@ export default function CmsEditorPage() {
                                 <label htmlFor={`prod-${product._id}`} style={{ cursor: "pointer", fontWeight: 500, fontSize: "14px", color: "var(--text-primary)" }}>{product.title}</label>
                                 <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: 0 }}>SKU: {product.sku}</p>
                               </div>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); handleToggleBestSeller(product._id, product.isBestSeller); }}
+                                style={{
+                                  background: "none", border: "none", cursor: "pointer",
+                                  color: product.isBestSeller ? "#eab308" : "var(--text-muted)",
+                                  display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: "600",
+                                  padding: "4px 8px", borderRadius: "4px", backgroundColor: product.isBestSeller ? "rgba(234, 179, 8, 0.1)" : "transparent"
+                                }}
+                                title={product.isBestSeller ? "Remove from Best Sellers" : "Mark as Best Seller"}
+                              >
+                                <Star fill={product.isBestSeller ? "#eab308" : "none"} size={16} />
+                                <span className="hidden sm:inline" style={{ marginLeft: "4px" }}>
+                                  {product.isBestSeller ? "Best Seller" : "Set Best Seller"}
+                                </span>
+                              </button>
                             </div>
                           ))
                         ) : (
                           <p style={{ fontSize: "13px", color: "var(--text-muted)", textAlign: "center", padding: "20px 0" }}>No active products available.</p>
                         )}
                       </div>
-                      <p style={styles.infoInfoBox}>Selected products will be displayed on the homepage. If no products are selected, the 6 most recent products will be shown automatically.</p>
+                      <p style={styles.infoInfoBox}>Selected products will be displayed on the homepage. If no products are selected, the 6 best selling products will be shown automatically.</p>
                     </div>
                   </div>
                 )}
@@ -318,7 +352,7 @@ export default function CmsEditorPage() {
               <iframe 
                 key={refreshKey}
                 id="previewIframe"
-                src={`http://localhost:3001#${activeTab}`} 
+                src={`http://localhost:3000#${activeTab}`} 
                 style={styles.iframe} 
                 title="Website Preview"
               />
@@ -332,7 +366,7 @@ export default function CmsEditorPage() {
 
 const styles = {
   container: { display: "flex", flexDirection: "column" },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", marginBottom: "28px" },
   title: { fontSize: "28px", fontWeight: "700" },
   subtitle: { fontSize: "14px", color: "var(--text-secondary)", marginTop: "2px" },
   saveBtn: { padding: "11px 22px", fontSize: "14px" },
@@ -341,14 +375,14 @@ const styles = {
   tabsRow: { display: "flex", flexDirection: "row", gap: "10px", padding: "12px 16px", borderRadius: "var(--border-radius)", backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow-xs)", overflowX: "auto", alignItems: "center" },
   tabBtn: { display: "flex", alignItems: "center", gap: "8px", padding: "10px 18px", borderRadius: "var(--border-radius-sm)", color: "var(--text-secondary)", backgroundColor: "transparent", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: "500", transition: "var(--transition-fast)", whiteSpace: "nowrap" },
   tabBtnActive: { backgroundColor: "var(--primary-brand-light)", color: "var(--primary-brand)", fontWeight: "600" },
-  workspaceCol: { flex: 1 },
+  workspaceCol: { flex: "1 1 400px", minWidth: "300px" },
   loadingWS: { height: "280px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", color: "var(--text-secondary)" },
   wsPanel: { padding: "28px", borderRadius: "var(--border-radius)", backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", boxShadow: "var(--shadow-sm)" },
   wsPanelHeader: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid var(--border-color)", paddingBottom: "18px", marginBottom: "20px" },
   panelTitle: { fontSize: "19px", fontWeight: "600" },
   panelDesc: { fontSize: "13px", color: "var(--text-muted)", marginTop: "2px" },
   addBtn: { padding: "8px 14px", fontSize: "12px" },
-  inputRow: { display: "flex", gap: "20px", marginBottom: "20px" },
+  inputRow: { display: "flex", gap: "20px", marginBottom: "20px", flexWrap: "wrap" },
   rowCardsContainer: { display: "flex", flexDirection: "column", gap: "20px" },
   cmsRowCard: { backgroundColor: "var(--bg-tertiary)", border: "1px solid var(--border-color)", borderRadius: "var(--border-radius-sm)", padding: "20px" },
   cardIndexHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px", marginBottom: "16px" },
@@ -361,7 +395,7 @@ const styles = {
   lockedTitle: { fontSize: "20px", fontWeight: "600", marginBottom: "10px" },
   lockedDesc: { fontSize: "14px", color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "20px" },
   lockBadge: { padding: "5px 12px", backgroundColor: "var(--primary-brand-light)", border: "1px solid rgba(108, 29, 27, 0.2)", borderRadius: "4px", fontSize: "11px", fontWeight: "700", color: "var(--primary-brand)", letterSpacing: "0.05em" },
-  previewCol: { width: "45%", borderRadius: "var(--border-radius)", border: "1px solid var(--border-color)", overflow: "hidden", display: "flex", flexDirection: "column", backgroundColor: "var(--bg-secondary)", boxShadow: "var(--shadow-sm)" },
+  previewCol: { flex: "1 1 350px", minWidth: "300px", borderRadius: "var(--border-radius)", border: "1px solid var(--border-color)", overflow: "hidden", display: "flex", flexDirection: "column", backgroundColor: "var(--bg-secondary)", boxShadow: "var(--shadow-sm)" },
   previewHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", backgroundColor: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-color)" },
   refreshBtn: { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", cursor: "pointer", color: "var(--primary-brand)", fontSize: "12px", fontWeight: "600", transition: "var(--transition-fast)" },
   iframe: { flex: 1, width: "100%", border: "none", backgroundColor: "#fff" }

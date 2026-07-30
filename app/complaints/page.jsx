@@ -184,7 +184,7 @@ const styles = {
     backgroundColor: "#fafafa",
     minHeight: "100vh",
   },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", marginBottom: "28px" },
   title: { fontSize: "28px", fontWeight: "700" },
   subtitle: { fontSize: "14px", color: "var(--text-secondary)", marginTop: "2px" },
   refreshBtn: { padding: "9px 15px", fontSize: "13px" },

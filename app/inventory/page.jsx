@@ -552,7 +552,7 @@ export default function InventoryPage() {
 
 function StatCard({ title, value, icon: Icon, color, bgColor, isLoading }) {
   return (
-    <div style={styles.statCard}>
+    <div style={styles.statCard} >
       <div style={{ ...styles.iconWrapper, backgroundColor: bgColor, color }}>
         <Icon size={24} />
       </div>
@@ -578,6 +578,8 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: "12px",
     marginBottom: "24px",
   },
   title: {
@@ -604,7 +606,8 @@ const styles = {
     gap: "10px",
     marginBottom: "20px",
     borderBottom: "1px solid var(--border-color)",
-    paddingBottom: "10px"
+    paddingBottom: "10px",
+    flexWrap: "wrap"
   },
   tab: {
     display: "flex",
