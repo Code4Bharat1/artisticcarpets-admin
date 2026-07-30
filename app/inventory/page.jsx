@@ -350,7 +350,7 @@ export default function InventoryPage() {
                         <td>
                           <div style={styles.productCell}>
                             <img 
-                              src={product.thumbnail?.path ? (product.thumbnail.path.startsWith("http") ? product.thumbnail.path : `http://localhost:5000${product.thumbnail.path}`) : "/placeholder.jpg"} 
+                              src={product.thumbnail?.path ? (product.thumbnail.path.startsWith("http") ? product.thumbnail.path : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${product.thumbnail.path}`) : "/placeholder.jpg"} 
                               alt={product.title || product.name} 
                               style={styles.productImg} 
                             />
@@ -493,7 +493,7 @@ export default function InventoryPage() {
               </div>
               <div style={styles.drawerBody}>
                 <img 
-                  src={selectedProduct.thumbnail?.path ? (selectedProduct.thumbnail.path.startsWith("http") ? selectedProduct.thumbnail.path : `http://localhost:5000${selectedProduct.thumbnail.path}`) : "/placeholder.jpg"} 
+                  src={selectedProduct.thumbnail?.path ? (selectedProduct.thumbnail.path.startsWith("http") ? selectedProduct.thumbnail.path : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${selectedProduct.thumbnail.path}`) : "/placeholder.jpg"} 
                   alt={selectedProduct.name} 
                   style={{ width: "100%", height: "200px", objectFit: "cover", borderRadius: "8px", marginBottom: "15px" }} 
                 />

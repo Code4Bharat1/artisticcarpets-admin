@@ -226,7 +226,7 @@ export default function ProductsPage() {
                       <div style={pageStyles.imgWrapper}>
                         {product.thumbnail?.path ? (
                           <img
-                            src={product.thumbnail.path.startsWith("http") ? product.thumbnail.path : `http://localhost:5000${product.thumbnail.path}`}
+                            src={product.thumbnail.path.startsWith("http") ? product.thumbnail.path : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${product.thumbnail.path}`}
                             alt={product.title}
                             style={pageStyles.img}
                           />

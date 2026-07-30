@@ -212,7 +212,7 @@ export default function ProductForm({ initialData = null }) {
               {isEditing && initialData?.thumbnail && !thumbnailFile && (
                 <div style={styles.currentImage}>
                   <p style={{fontSize: "12px", color: "var(--text-muted)", marginBottom: "4px"}}>Current Thumbnail:</p>
-                  <img src={initialData.thumbnail.path.startsWith("http") ? initialData.thumbnail.path : `http://localhost:5000${initialData.thumbnail.path}`} alt="Current Thumbnail" style={styles.previewImg} />
+                  <img src={initialData.thumbnail.path.startsWith("http") ? initialData.thumbnail.path : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${initialData.thumbnail.path}`} alt="Current Thumbnail" style={styles.previewImg} />
                 </div>
               )}
             </div>
@@ -250,7 +250,7 @@ export default function ProductForm({ initialData = null }) {
                   <p style={{fontSize: "12px", color: "var(--text-muted)", marginBottom: "4px"}}>Current Gallery Images:</p>
                   <div style={{display: "flex", gap: "8px", flexWrap: "wrap"}}>
                     {initialData.images.map((img, i) => (
-                      <img key={i} src={img.path.startsWith("http") ? img.path : `http://localhost:5000${img.path}`} alt="Gallery" style={styles.previewImg} />
+                      <img key={i} src={img.path.startsWith("http") ? img.path : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${img.path}`} alt="Gallery" style={styles.previewImg} />
                     ))}
                   </div>
                 </div>
