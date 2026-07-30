@@ -18,7 +18,8 @@ export default function MaterialsTab({ refreshTrigger }) {
   const fetchMaterials = async () => {
     setLoading(true);
     try {
-      let url = `http://127.0.0.1:5000/api/materials?page=${page}&limit=${limit}`;
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      let url = `${baseUrl}/materials?page=${page}&limit=${limit}`;
       if (search) url += `&search=${search}`;
       if (statusFilter !== "all") url += `&status=${statusFilter}`;
 

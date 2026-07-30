@@ -20,7 +20,8 @@ export default function UpdateStockModal({ material, onClose, onSave }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/materials/${material._id}/stock`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/materials/${material._id}/stock`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -76,7 +76,8 @@ export default function InventoryPage() {
       if (updates.length === 0) return alert("No valid stock updates found");
 
       try {
-        const res = await fetch("http://127.0.0.1:5000/api/inventory/bulk", {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res = await fetch(`${baseUrl}/inventory/bulk`, {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
@@ -115,7 +116,8 @@ export default function InventoryPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/inventory/stats", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/inventory/stats`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("artistic_carpets_admin_token")}` }
       });
       const data = await res.json();
@@ -127,7 +129,8 @@ export default function InventoryPage() {
 
   const fetchMaterialStats = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/materials/stats", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/materials/stats`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("artistic_carpets_admin_token")}` }
       });
       const data = await res.json();
@@ -140,7 +143,8 @@ export default function InventoryPage() {
   const fetchInventory = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/inventory?page=${page}&limit=${limit}&search=${search}&stockStatus=${statusFilter}`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/inventory?page=${page}&limit=${limit}&search=${search}&stockStatus=${statusFilter}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("artistic_carpets_admin_token")}` }
       });
       const data = await res.json();
@@ -175,7 +179,8 @@ export default function InventoryPage() {
   const handleAdjustSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/inventory/adjust", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/inventory/adjust`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -206,7 +211,8 @@ export default function InventoryPage() {
 
   const exportCSV = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/inventory/export", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/inventory/export`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("artistic_carpets_admin_token")}` }
       });
       if (res.ok) {
