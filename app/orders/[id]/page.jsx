@@ -56,7 +56,7 @@ export default function OrderDetailPage({ params }) {
     if (!newStatus) return;
     setUpdatingStatus(true);
     try {
-      const data = await apiRequest.patch(`/orders/${id}/status`, {
+      const data = await apiRequest.post(`/orders/${id}/status`, {
         status: newStatus,
         note: statusNote || undefined,
         trackingNumber: newStatus === "shipped" ? trackingNumber : undefined,
