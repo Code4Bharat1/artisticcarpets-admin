@@ -27,11 +27,7 @@ export default function OrderDetailPage({ params }) {
   const [newNote, setNewNote] = useState("");
   const [addingNote, setAddingNote] = useState(false);
 
-  const [refundReason, setRefundReason] = useState("");
-  const [refundAmount, setRefundAmount] = useState("");
-  const [processingRefund, setProcessingRefund] = useState(false);
-  const [actionNotes, setActionNotes] = useState("");
-  const [transactionId, setTransactionId] = useState("");
+
 
   const fetchOrderDetail = async () => {
     setLoading(true);
@@ -95,42 +91,10 @@ export default function OrderDetailPage({ params }) {
     }
   };
 
-  const handleRequestRefund = async (e) => {
-    e.preventDefault();
-    setProcessingRefund(true);
-    try {
-      const data = await apiRequest.post(`/orders/${id}/refund`, {
-        reason: refundReason,
-        amount: parseFloat(refundAmount) || order.total,
-      });
-      if (data.success) { setRefundReason(""); setRefundAmount(""); fetchOrderDetail(); }
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to submit refund request.");
-    } finally {
-      setProcessingRefund(false);
-    }
-  };
 
-  const handleProcessRefundRequest = async (refundId, action) => {
-    if (!window.confirm(`Are you sure you want to ${action} this refund request?`)) return;
-    setProcessingRefund(true);
-    try {
-      const data = await apiRequest.patch(`/orders/${id}/refund`, {
-        refundId, action,
-        notes: actionNotes || undefined,
-        transactionId: transactionId || undefined,
-      });
-      if (data.success) { setActionNotes(""); setTransactionId(""); fetchOrderDetail(); }
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to process refund request.");
-    } finally {
-      setProcessingRefund(false);
-    }
-  };
 
   const getAvailableTransitions = (currentStatus) => {
-    if (["cancelled", "refunded"].includes(currentStatus)) return [];
-    if (currentStatus === "returned") return ["refunded"];
+    if (currentStatus === "cancelled") return [];
 
     const forwardStatuses = ["shipped", "out_for_delivery", "delivered"];
     const currentIndex = forwardStatuses.indexOf(currentStatus);
@@ -384,51 +348,7 @@ export default function OrderDetailPage({ params }) {
               </div>
             </div>
 
-            {/* Refunds */}
-            {["delivered", "returned", "refunded"].includes(order.status) && (
-              <div style={styles.panel} className="glass">
-                <h3 style={styles.panelTitle}>Refund Controls</h3>
-                {order.refunds && order.refunds.length > 0 ? (
-                  <div style={styles.refundsList}>
-                    {order.refunds.map((ref) => (
-                      <div key={ref._id} style={styles.refundRequestItem}>
-                        <div style={styles.refundHeader}>
-                          <span style={styles.refundAmountLabel}>Amount: {formatCurrency(ref.amount)}</span>
-                          <span className={`badge badge-${ref.status === "processed" ? "success" : ref.status === "requested" ? "warning" : "danger"}`}>{ref.status}</span>
-                        </div>
-                        <p style={styles.refundReason}><strong>Reason:</strong> {ref.reason}</p>
-                        {ref.status === "requested" && (
-                          <div style={styles.refundActionsForm}>
-                            <div className="form-group" style={{ marginBottom: "8px" }}><input type="text" placeholder="Transaction Id..." value={transactionId} onChange={(e) => setTransactionId(e.target.value)} className="form-input" style={{ padding: "8px", fontSize: "12px" }} /></div>
-                            <div className="form-group" style={{ marginBottom: "12px" }}><input type="text" placeholder="Notes (optional)..." value={actionNotes} onChange={(e) => setActionNotes(e.target.value)} className="form-input" style={{ padding: "8px", fontSize: "12px" }} /></div>
-                            <div style={styles.refundButtonRow}>
-                              <button onClick={() => handleProcessRefundRequest(ref._id, "approve")} className="btn btn-primary" style={styles.actionRefundBtn} disabled={processingRefund}>Approve</button>
-                              <button onClick={() => handleProcessRefundRequest(ref._id, "reject")} className="btn btn-secondary" style={{ ...styles.actionRefundBtn, color: "var(--color-danger)" }} disabled={processingRefund}>Reject</button>
-                            </div>
-                          </div>
-                        )}
-                        {ref.status === "processed" && (
-                          <div style={styles.refundProcessedBox}>
-                            <p>Processed At: {new Date(ref.processedAt).toLocaleDateString()}</p>
-                            {ref.transactionId && <p>Transaction: <code>{ref.transactionId}</code></p>}
-                            {ref.notes && <p>Notes: {ref.notes}</p>}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : order.status === "returned" ? (
-                  <form onSubmit={handleRequestRefund} style={styles.refundRequestForm}>
-                    <p style={styles.panelDesc}>Submit refund request on behalf of customer:</p>
-                    <div className="form-group"><label className="form-label" htmlFor="refundAmount">Refund Amount</label><input id="refundAmount" type="number" placeholder={order.total} value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} className="form-input" /></div>
-                    <div className="form-group"><label className="form-label" htmlFor="refundReason">Reason</label><input id="refundReason" type="text" placeholder="Customer returned items..." value={refundReason} onChange={(e) => setRefundReason(e.target.value)} className="form-input" required /></div>
-                    <button type="submit" className="btn btn-danger" style={{ width: "100%" }} disabled={processingRefund}>Request Refund</button>
-                  </form>
-                ) : (
-                  <p style={styles.panelDesc}>Refunds can only be requested once order status is transitioned to Returned.</p>
-                )}
-              </div>
-            )}
+
           </div>
         </div>
       </div>
@@ -493,14 +413,5 @@ const styles = {
   noteMeta: { display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-muted)", marginTop: "6px" },
   noteForm: { display: "flex", flexDirection: "column", gap: "8px" },
   addNoteBtn: { alignSelf: "flex-end", padding: "8px 12px", fontSize: "12px" },
-  refundsList: { display: "flex", flexDirection: "column", gap: "16px" },
-  refundRequestItem: { backgroundColor: "var(--bg-tertiary)", border: "1px solid var(--border-color)", borderRadius: "var(--border-radius-sm)", padding: "16px" },
-  refundHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" },
-  refundAmountLabel: { fontSize: "14px", fontWeight: "600", color: "var(--primary-brand)" },
-  refundReason: { fontSize: "13px", color: "var(--text-secondary)", marginBottom: "12px" },
-  refundActionsForm: { borderTop: "1px solid var(--border-color)", paddingTop: "12px", marginTop: "8px" },
-  refundButtonRow: { display: "flex", gap: "12px" },
-  actionRefundBtn: { flex: 1, padding: "8px", fontSize: "12px" },
-  refundProcessedBox: { fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.6", borderTop: "1px solid var(--border-color)", paddingTop: "8px", marginTop: "8px" },
-  refundRequestForm: { display: "flex", flexDirection: "column" },
+
 };

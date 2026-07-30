@@ -132,7 +132,7 @@ export default function OrdersPage() {
                 <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
                 <option value="returned">Returned</option>
-                <option value="refunded">Refunded</option>
+
               </select>
             </div>
 
@@ -148,7 +148,7 @@ export default function OrdersPage() {
                 <option value="pending">Pending</option>
                 <option value="paid">Paid</option>
                 <option value="failed">Failed</option>
-                <option value="refunded">Refunded</option>
+
               </select>
             </div>
 

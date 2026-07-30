@@ -123,14 +123,7 @@ export default function DashboardPage() {
             icon={RotateCcw}
             accentColor="var(--color-warning)"
           />
-          <DashboardStatCard
-            title="Pending Refunds"
-            value={data.kpi.pendingRefunds}
-            trend={0}
-            icon={AlertTriangle}
-            accentColor="var(--color-warning)"
-            onClick={() => router.push('/refunds')}
-          />
+
           <DashboardStatCard
             title="Support"
             value={data.kpi.complaints}
