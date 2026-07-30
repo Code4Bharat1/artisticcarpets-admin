@@ -352,7 +352,7 @@ export default function CmsEditorPage() {
               <iframe 
                 key={refreshKey}
                 id="previewIframe"
-                src={`${process.env.NEXT_PUBLIC_FRONTEND_URL || "https://aartisticcarpets.nexcorealliance.com"}#${activeTab}`} 
+                src={`${process.env.NEXT_PUBLIC_FRONTEND_URL || "https://artisticcarpets.nexcorealliance.com"}#${activeTab}`} 
                 style={styles.iframe} 
                 title="Website Preview"
               />
