@@ -30,7 +30,7 @@ export default function CmsEditorPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await apiRequest.get("/products?limit=100&status=active");
+      const res = await apiRequest.get("/products?limit=1000&status=active");
       if (res.success) {
         setAvailableProducts(res.data?.products || []);
       }
@@ -105,7 +105,7 @@ export default function CmsEditorPage() {
       title: pageTitle, isActive: true,
       sections: [
         { sectionKey: "explore-collections", title: collectionsHeader.title, content: collectionsHeader.subtitle, data: { collections } },
-        { sectionKey: "curated-highlights", title: highlightsHeader.title, content: highlightsHeader.subtitle, data: { products: highlightsProducts } },
+        { sectionKey: "curated-highlights", title: highlightsHeader.title, content: highlightsHeader.subtitle, data: { products: highlightsProducts.filter(id => availableProducts.some(p => p._id === id)) } },
         { sectionKey: "journal", title: journalHeader.title, content: journalHeader.subtitle, data: { articles: journalArticles } },
         { sectionKey: "footer", title: "Footer", content: "", data: footerLinks },
       ]
@@ -147,8 +147,9 @@ export default function CmsEditorPage() {
       });
 
       const data = await res.json();
-      if (res.ok && data.data?.files?.[0]?.url) {
-        const url = data.data.files[0].url;
+      const files = data.files || data.data?.files;
+      if (res.ok && files?.[0]?.url) {
+        const url = files[0].url;
         if (type === "collection") handleCollectionChange(index, field, url);
         else if (type === "journal") handleArticleChange(index, field, url);
       } else {
@@ -162,14 +163,19 @@ export default function CmsEditorPage() {
   };
 
   const handleProductToggle = (productId) => {
-    if (highlightsProducts.includes(productId)) {
-      setHighlightsProducts(highlightsProducts.filter(id => id !== productId));
+    // Filter out deleted/ghost products to ensure accurate counting
+    const validHighlights = highlightsProducts.filter(id => 
+      availableProducts.some(p => p._id === id)
+    );
+
+    if (validHighlights.includes(productId)) {
+      setHighlightsProducts(validHighlights.filter(id => id !== productId));
     } else {
-      if (highlightsProducts.length >= 6) {
+      if (validHighlights.length >= 6) {
         alert("You can only select up to 6 products for Curated Highlights.");
         return;
       }
-      setHighlightsProducts([...highlightsProducts, productId]);
+      setHighlightsProducts([...validHighlights, productId]);
     }
   };
 
@@ -282,7 +288,7 @@ export default function CmsEditorPage() {
                     
                     <div style={{ marginTop: "24px" }}>
                       <label className="form-label" style={{ marginBottom: "12px", display: "block" }}>
-                        Select Products ({highlightsProducts.length}/6)
+                        Select Products ({highlightsProducts.filter(id => availableProducts.some(p => p._id === id)).length}/6)
                       </label>
                       <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid var(--border-color)", borderRadius: "var(--border-radius-sm)", padding: "12px", display: "grid", gap: "10px", backgroundColor: "var(--bg-tertiary)" }}>
                         {availableProducts.length > 0 ? (

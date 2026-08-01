@@ -12,6 +12,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  // Forgot password state
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [resetStep, setResetStep] = useState(1);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("artistic_carpets_admin_token");
@@ -54,6 +62,77 @@ export default function LoginPage() {
     }
   };
 
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMsg("");
+
+    if (!resetEmail) {
+      setError("Please enter your email.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await apiRequest.post("/auth/forgot-password", {
+        email: resetEmail,
+      });
+
+      if (data.success) {
+        setSuccessMsg(data.message);
+        setResetStep(2);
+      } else {
+        setError(data.message || "Failed to send reset link.");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Failed to send reset link."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMsg("");
+
+    if (!resetToken || !newPassword) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await apiRequest.post("/auth/reset-password", {
+        email: resetEmail,
+        resetToken,
+        newPassword,
+      });
+
+      if (data.success) {
+        setSuccessMsg("Password reset successfully. You can now login.");
+        setTimeout(() => {
+          setIsForgotPassword(false);
+          setResetStep(1);
+          setResetEmail("");
+          setResetToken("");
+          setNewPassword("");
+          setSuccessMsg("");
+        }, 2000);
+      } else {
+        setError(data.message || "Failed to reset password.");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Failed to reset password."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={styles.container}>
 
@@ -88,8 +167,14 @@ export default function LoginPage() {
                 <span>{error}</span>
               </div>
             )}
+            {successMsg && (
+              <div style={{ ...styles.errorBox, backgroundColor: "rgba(34, 197, 94, 0.08)", borderColor: "rgba(34, 197, 94, 0.2)", color: "#15803d" }} className="fade-in">
+                <span>{successMsg}</span>
+              </div>
+            )}
 
-            <form onSubmit={handleSubmit} style={styles.form}>
+            {!isForgotPassword ? (
+              <form onSubmit={handleSubmit} style={styles.form}>
               <div style={styles.formGroup}>
                 <label style={styles.label} htmlFor="identifier">
                   EMAIL ADDRESS
@@ -111,9 +196,9 @@ export default function LoginPage() {
                   <label style={styles.label} htmlFor="password">
                     PASSWORD
                   </label>
-                  <Link href="#" style={styles.forgotLink}>
+                  <button type="button" onClick={() => { setIsForgotPassword(true); setError(""); setSuccessMsg(""); }} style={{ ...styles.forgotLink, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
                     Forgot Password?
-                  </Link>
+                  </button>
                 </div>
                 <input
                   id="password"
@@ -151,6 +236,87 @@ export default function LoginPage() {
                 <span>Google</span>
               </button>
             </form>
+            ) : (
+              <div>
+                {resetStep === 1 ? (
+                  <form onSubmit={handleForgotPasswordSubmit} style={styles.form}>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label} htmlFor="resetEmail">
+                        EMAIL ADDRESS
+                      </label>
+                      <input
+                        id="resetEmail"
+                        type="email"
+                        placeholder="admin@artisticcarpets.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        style={styles.input}
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      style={{ ...styles.loginBtn, ...(loading ? styles.btnDisabled : {}) }}
+                      disabled={loading}
+                    >
+                      {loading ? "SENDING..." : "SEND RESET LINK"}
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleResetPasswordSubmit} style={styles.form}>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label} htmlFor="resetToken">
+                        RESET TOKEN
+                      </label>
+                      <input
+                        id="resetToken"
+                        type="text"
+                        placeholder="Enter token"
+                        value={resetToken}
+                        onChange={(e) => setResetToken(e.target.value)}
+                        style={styles.input}
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label} htmlFor="newPassword">
+                        NEW PASSWORD
+                      </label>
+                      <input
+                        id="newPassword"
+                        type="password"
+                        placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        style={styles.input}
+                        disabled={loading}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      style={{ ...styles.loginBtn, ...(loading ? styles.btnDisabled : {}) }}
+                      disabled={loading}
+                    >
+                      {loading ? "RESETTING..." : "RESET PASSWORD"}
+                    </button>
+                  </form>
+                )}
+                
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => { setIsForgotPassword(false); setResetStep(1); setError(""); setSuccessMsg(""); }} 
+                    style={{ ...styles.forgotLink, background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '13px' }}
+                  >
+                    Back to Login
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -313,8 +313,6 @@ export default function ProductForm({ initialData = null }) {
           
           </div>
   
-        </div>
-
         {/* RIGHT COLUMN - Organization & Visibility */}
         <div style={styles.sideCol}>
           
