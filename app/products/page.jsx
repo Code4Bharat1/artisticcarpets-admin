@@ -11,6 +11,8 @@ export default function ProductsPage() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [categories, setCategories] = useState([]);
   const [actionLoading, setActionLoading] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -24,6 +26,9 @@ export default function ProductsPage() {
       let url = `${baseUrl}/products/admin-list?limit=100`;
       if (statusFilter !== "all") {
         url += `&status=${statusFilter}`;
+      }
+      if (categoryFilter !== "all") {
+        url += `&category=${encodeURIComponent(categoryFilter)}`;
       }
       if (searchTerm) {
         url += `&keyword=${encodeURIComponent(searchTerm)}`;
@@ -47,10 +52,27 @@ export default function ProductsPage() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${baseUrl}/categories`);
+      if (res.ok) {
+        const data = await res.json();
+        setCategories(data.data || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch categories", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   useEffect(() => {
     setCurrentPage(1);
     fetchProducts();
-  }, [statusFilter, searchTerm]);
+  }, [statusFilter, categoryFilter, searchTerm]);
 
   const totalPages = Math.ceil(products.length / itemsPerPage);
   const paginatedProducts = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -170,6 +192,18 @@ export default function ProductsPage() {
           />
         </div>
         <div style={pageStyles.actionGroup}>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            style={pageStyles.select}
+          >
+            <option value="all">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
