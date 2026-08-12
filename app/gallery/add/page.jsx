@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import AdminLayout from "../../components/AdminLayout";
+import AdminLayout from "../../../components/AdminLayout";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Upload, X, GripVertical } from "lucide-react";
 import Link from "next/link";
-import apiRequest from "../../lib/api";
+import apiRequest from "../../../lib/api";
 
 export default function AddGalleryPage() {
   const router = useRouter();
