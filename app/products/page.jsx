@@ -11,8 +11,6 @@ export default function ProductsPage() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [categories, setCategories] = useState([]);
   const [actionLoading, setActionLoading] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -26,9 +24,6 @@ export default function ProductsPage() {
       let url = `${baseUrl}/products/admin-list?limit=100`;
       if (statusFilter !== "all") {
         url += `&status=${statusFilter}`;
-      }
-      if (categoryFilter !== "all") {
-        url += `&category=${encodeURIComponent(categoryFilter)}`;
       }
       if (searchTerm) {
         url += `&keyword=${encodeURIComponent(searchTerm)}`;
@@ -52,27 +47,10 @@ export default function ProductsPage() {
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-      const res = await fetch(`${baseUrl}/categories`);
-      if (res.ok) {
-        const data = await res.json();
-        setCategories(data.data || []);
-      }
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
   useEffect(() => {
     setCurrentPage(1);
     fetchProducts();
-  }, [statusFilter, categoryFilter, searchTerm]);
+  }, [statusFilter, searchTerm]);
 
   const totalPages = Math.ceil(products.length / itemsPerPage);
   const paginatedProducts = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -161,190 +139,178 @@ export default function ProductsPage() {
   return (
     <AdminLayout>
       <div style={pageStyles.container}>
-      {/* Title & Navigation */}
-      <div style={pageStyles.header}>
-        <div>
-          <h2 style={pageStyles.title}>Products Management</h2>
-          <p style={pageStyles.subtitle}>
-            Search, filter, and manage platform products ({products.length} total)
-          </p>
-        </div>
-        <button
-          onClick={fetchProducts}
-          className="btn btn-secondary"
-          style={pageStyles.refreshBtn}
-        >
-          <RefreshCw size={15} />
-          <span>Reload</span>
-        </button>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div style={pageStyles.filterBar}>
-        <div style={pageStyles.searchBox}>
-          <Search size={16} style={pageStyles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={pageStyles.searchInput}
-          />
-        </div>
-        <div style={pageStyles.actionGroup}>
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            style={pageStyles.select}
-          >
-            <option value="all">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={pageStyles.select}
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
-          </select>
-          <Link href="/products/new" style={pageStyles.addButton}>
-            <Plus size={15} />
-            <span className="hidden sm:inline" style={{ marginLeft: "4px" }}>Add Product</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Error State */}
-      {error && (
-        <div style={pageStyles.errorBox}>
-          <AlertCircle size={20} />
-          <span>{error}</span>
-          <button onClick={fetchProducts} style={pageStyles.retryBtn}>Retry</button>
-        </div>
-      )}
-
-      {/* Table */}
-      <div className="table-container">
-        {isLoading ? (
-          <div style={pageStyles.loadingState}>
-            <RefreshCw size={24} className="spin" color="var(--primary-brand)" />
-            <p>Loading products...</p>
+        {/* Title & Navigation */}
+        <div style={pageStyles.header}>
+          <div>
+            <h2 style={pageStyles.title}>Products Management</h2>
+            <p style={pageStyles.subtitle}>
+              Search, filter, and manage platform products ({products.length} total)
+            </p>
           </div>
-        ) : products.length === 0 ? (
-          <div style={pageStyles.emptyState}>
-            <Package size={48} color="var(--border-color)" />
-            <h3>No products found</h3>
-            <p>Try adjusting your search or add a new product.</p>
+          <button
+            onClick={fetchProducts}
+            className="btn btn-secondary"
+            style={pageStyles.refreshBtn}
+          >
+            <RefreshCw size={15} />
+            <span>Reload</span>
+          </button>
+        </div>
+
+        {/* Filter and Search Bar */}
+        <div style={pageStyles.filterBar}>
+          <div style={pageStyles.searchBox}>
+            <Search size={16} style={pageStyles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={pageStyles.searchInput}
+            />
           </div>
-        ) : (
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Status</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedProducts.map((product) => (
-                <tr key={product._id}>
-                  <td>
-                    <div style={pageStyles.productCell}>
-                      <div style={pageStyles.imgWrapper}>
-                        {product.thumbnail?.path ? (
-                          <img
-                            src={product.thumbnail.path.startsWith("http") ? product.thumbnail.path : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${product.thumbnail.path}`}
-                            alt={product.title}
-                            style={pageStyles.img}
-                          />
-                        ) : (
-                          <div style={pageStyles.imgPlaceholder}>No Img</div>
-                        )}
-                      </div>
-                      <div>
-                        <div style={pageStyles.productTitle}>{product.title}</div>
-                        <div style={pageStyles.productSku}>{product.sku}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span style={pageStyles.category}>{product.category}</span>
-                    {product.productCollection && <span style={pageStyles.collection}>{product.productCollection}</span>}
-                  </td>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>₹{product.price?.toFixed(2)}</div>
-                    {product.discountPrice && (
-                      <div style={{ fontSize: '12px', textDecoration: 'line-through', color: 'var(--text-muted)' }}>
-                        ₹{product.discountPrice.toFixed(2)}
-                      </div>
-                    )}
-                  </td>
-                  <td>{getStockBadge(product.stock)}</td>
-                  <td>{getStatusBadge(product.status)}</td>
-                  <td style={{ textAlign: "right" }}>
-                    <div style={pageStyles.actions}>
-                      <Link href={`/products/${product._id}`} style={pageStyles.iconBtn} title="Edit">
-                        <Edit2 size={16} />
-                      </Link>
-                      <button
-                        onClick={() => handleArchive(product._id, product.status)}
-                        style={pageStyles.iconBtn}
-                        disabled={actionLoading === product._id}
-                        title={product.status === "archived" ? "Restore" : "Archive"}
-                      >
-                        <Archive size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product._id)}
-                        style={{ ...pageStyles.iconBtn, color: "var(--color-danger)" }}
-                        disabled={actionLoading === product._id}
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
+          <div style={pageStyles.actionGroup}>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={pageStyles.select}
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </select>
+            <Link href="/products/new" style={pageStyles.addButton}>
+              <Plus size={15} />
+              <span className="hidden sm:inline" style={{ marginLeft: "4px" }}>Add Product</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Error State */}
+        {error && (
+          <div style={pageStyles.errorBox}>
+            <AlertCircle size={20} />
+            <span>{error}</span>
+            <button onClick={fetchProducts} style={pageStyles.retryBtn}>Retry</button>
+          </div>
+        )}
+
+        {/* Table */}
+        <div className="table-container">
+          {isLoading ? (
+            <div style={pageStyles.loadingState}>
+              <RefreshCw size={24} className="spin" color="var(--primary-brand)" />
+              <p>Loading products...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div style={pageStyles.emptyState}>
+              <Package size={48} color="var(--border-color)" />
+              <h3>No products found</h3>
+              <p>Try adjusting your search or add a new product.</p>
+            </div>
+          ) : (
+            <table className="custom-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-        
-        {!isLoading && products.length > 10 && (
-          <div style={pageStyles.paginationContainer}>
-            <button 
-              style={{ ...pageStyles.paginationBtn, opacity: currentPage === 1 ? 0.5 : 1 }} 
-              disabled={currentPage === 1} 
-              onClick={() => setCurrentPage(p => p - 1)}
-            >
-              Previous
-            </button>
-            <span style={pageStyles.paginationInfo}>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button 
-              style={{ ...pageStyles.paginationBtn, opacity: currentPage === totalPages ? 0.5 : 1 }} 
-              disabled={currentPage === totalPages} 
-              onClick={() => setCurrentPage(p => p + 1)}
-            >
-              Next
-            </button>
-          </div>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {paginatedProducts.map((product) => (
+                  <tr key={product._id}>
+                    <td>
+                      <div style={pageStyles.productCell}>
+                        <div style={pageStyles.imgWrapper}>
+                          {product.thumbnail?.path ? (
+                            <img
+                              src={product.thumbnail.path.startsWith("http") ? product.thumbnail.path : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${product.thumbnail.path}`}
+                              alt={product.title}
+                              style={pageStyles.img}
+                            />
+                          ) : (
+                            <div style={pageStyles.imgPlaceholder}>No Img</div>
+                          )}
+                        </div>
+                        <div>
+                          <div style={pageStyles.productTitle}>{product.title}</div>
+                          <div style={pageStyles.productSku}>{product.sku}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span style={pageStyles.category}>{product.category}</span>
+                      {product.productCollection && <span style={pageStyles.collection}>{product.productCollection}</span>}
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>₹{product.price?.toFixed(2)}</div>
+                      {product.discountPrice && (
+                        <div style={{ fontSize: '12px', textDecoration: 'line-through', color: 'var(--text-muted)' }}>
+                          ₹{product.discountPrice.toFixed(2)}
+                        </div>
+                      )}
+                    </td>
+                    <td>{getStockBadge(product.stock)}</td>
+                    <td>{getStatusBadge(product.status)}</td>
+                    <td style={{ textAlign: "right" }}>
+                      <div style={pageStyles.actions}>
+                        <Link href={`/products/${product._id}`} style={pageStyles.iconBtn} title="Edit">
+                          <Edit2 size={16} />
+                        </Link>
+                        <button
+                          onClick={() => handleArchive(product._id, product.status)}
+                          style={pageStyles.iconBtn}
+                          disabled={actionLoading === product._id}
+                          title={product.status === "archived" ? "Restore" : "Archive"}
+                        >
+                          <Archive size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product._id)}
+                          style={{ ...pageStyles.iconBtn, color: "var(--color-danger)" }}
+                          disabled={actionLoading === product._id}
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
 
-      <style dangerouslySetInnerHTML={{
-        __html: `
+          {!isLoading && products.length > 10 && (
+            <div style={pageStyles.paginationContainer}>
+              <button
+                style={{ ...pageStyles.paginationBtn, opacity: currentPage === 1 ? 0.5 : 1 }}
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => p - 1)}
+              >
+                Previous
+              </button>
+              <span style={pageStyles.paginationInfo}>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                style={{ ...pageStyles.paginationBtn, opacity: currentPage === totalPages ? 0.5 : 1 }}
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => p + 1)}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
+
+        <style dangerouslySetInnerHTML={{
+          __html: `
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
       `}} />
