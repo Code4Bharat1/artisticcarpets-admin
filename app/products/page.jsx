@@ -5,6 +5,16 @@ import Link from "next/link";
 import { Plus, Edit2, Trash2, Archive, Eye, Search, AlertCircle, RefreshCw, Package, ArrowLeft } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
 
+// Robust image URL helper
+const getImageUrl = (path) => {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  let baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://api-artisticcarpets.nexcorealliance.com/api";
+  if (baseUrl.endsWith("/api")) baseUrl = baseUrl.slice(0, -4);
+  else if (baseUrl.endsWith("/api/")) baseUrl = baseUrl.slice(0, -5);
+  return `${baseUrl}${path}`;
+};
+
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -229,7 +239,7 @@ export default function ProductsPage() {
                         <div style={pageStyles.imgWrapper}>
                           {product.thumbnail?.path ? (
                             <img
-                              src={product.thumbnail.path.startsWith("http") ? product.thumbnail.path : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace("/api", "")}${product.thumbnail.path}`}
+                              src={getImageUrl(product.thumbnail.path)}
                               alt={product.title}
                               style={pageStyles.img}
                             />
