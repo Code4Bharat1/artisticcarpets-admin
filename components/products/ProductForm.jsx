@@ -91,6 +91,7 @@ export default function ProductForm({ initialData = null }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    alert("Save button clicked! Connecting to backend...");
     setIsLoading(true); setError(null);
     try {
       const token = localStorage.getItem("artistic_carpets_admin_token");
@@ -131,9 +132,16 @@ export default function ProductForm({ initialData = null }) {
         body: submitData
       });
 
-      if (!res.ok) throw new Error((await res.json()).message || "Failed to save product");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to save product");
+      }
+      
+      alert("Product saved successfully!");
       router.push("/products");
     } catch (err) {
+      console.error(err);
+      alert("Error saving product: " + err.message);
       setError(err.message);
     } finally {
       setIsLoading(false);
