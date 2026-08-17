@@ -32,7 +32,7 @@ export default function PricingInventory({ formData, setFormData, handleChange }
   return (
     <div style={styles.card}>
       <h3 style={{...styles.cardTitle, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        <span>Pricing & Inventory (Variants)</span>
+        <span>Pricing</span>
         <button 
           type="button" 
           onClick={addVariant} 
@@ -114,14 +114,10 @@ export default function PricingInventory({ formData, setFormData, handleChange }
       {/* Global SKU for the product */}
       <div style={{ marginTop: "24px", paddingTop: "24px", borderTop: "1px solid var(--border-color)" }}>
         <h4 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "16px", color: "var(--text-primary)" }}>Global Settings</h4>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
           <div style={styles.formGroup}>
             <label style={styles.label}>Product SKU *</label>
             <input required type="text" name="sku" value={formData.sku} onChange={handleChange} style={styles.input} placeholder="Auto-generated if empty" />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Discount Price (Optional) (₹)</label>
-            <input type="number" min="0" step="0.01" name="discountPrice" value={formData.discountPrice} onChange={handleChange} style={styles.input} placeholder="Overrides variant prices" />
           </div>
         </div>
       </div>

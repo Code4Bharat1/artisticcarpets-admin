@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Check } from "lucide-react";
 import { formStyles as styles } from "./FormStyles";
 
 export default function MediaUpload({
@@ -9,9 +9,13 @@ export default function MediaUpload({
   initialData,
   thumbnailFile,
   handleThumbnailChange,
+  existingImages = [],
+  removeExistingImage,
   galleryFiles,
   handleGalleryChange,
   removeGalleryFile,
+  hoverImageIndex,
+  setHoverImageIndex,
 }) {
   const getImageUrl = (path) => {
     if (!path) return "";
@@ -57,20 +61,66 @@ export default function MediaUpload({
         {galleryFiles.length > 0 && (
           <div style={styles.galleryPreview} style={{marginBottom: "16px"}}>
             {galleryFiles.map((file, i) => (
-              <div key={i} style={styles.galleryItem}>
-                <span style={{fontSize: "12px"}}>{file.name.substring(0, 25)}...</span>
-                <button type="button" onClick={() => removeGalleryFile(i)} style={styles.removeBtn}><X size={14} /></button>
+              <div 
+                key={i} 
+                style={{ 
+                  ...styles.galleryItem, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'flex-start', 
+                  gap: '8px',
+                  cursor: 'pointer',
+                  border: '1px solid var(--border-color)',
+                  padding: '8px',
+                  position: 'relative'
+                }}
+                onClick={() => setHoverImageIndex(i)}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                  <span style={{fontSize: "12px"}}>{file.name.substring(0, 25)}...</span>
+                  <button type="button" onClick={(e) => { e.stopPropagation(); removeGalleryFile(i); }} style={styles.removeBtn}><X size={14} /></button>
+                </div>
+                {hoverImageIndex === i && (
+                  <span style={{ fontSize: '12px', color: '#7B1E1E', fontWeight: '500' }}>Hover Image</span>
+                )}
               </div>
             ))}
           </div>
         )}
 
-        {isEditing && initialData?.images?.length > 0 && galleryFiles.length === 0 && (
+        {isEditing && existingImages?.length > 0 && (
           <div style={styles.currentImage} style={{marginBottom: "16px"}}>
             <p style={{fontSize: "12px", color: "var(--text-muted)", marginBottom: "4px"}}>Current Gallery Images:</p>
-            <div style={{display: "flex", gap: "8px", flexWrap: "wrap"}}>
-              {initialData.images.map((img, i) => (
-                <img key={i} src={getImageUrl(img.path)} alt="Gallery" style={styles.previewImg} />
+            <div style={{display: "flex", gap: "12px", flexWrap: "wrap"}}>
+              {existingImages.map((img, i) => (
+                <div 
+                  key={i} 
+                  style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center', cursor: 'pointer' }}
+                  onClick={() => setHoverImageIndex(i)}
+                >
+                  <div style={{ position: 'relative' }}>
+                    <button 
+                      type="button" 
+                      onClick={(e) => { e.stopPropagation(); removeExistingImage(i); }} 
+                      style={{ ...styles.removeBtn, position: 'absolute', top: '4px', right: '4px', zIndex: 10, padding: '2px', backgroundColor: 'rgba(255,255,255,0.8)' }}
+                    >
+                      <X size={14} color="#333" />
+                    </button>
+                    <img 
+                      src={getImageUrl(img.path)} 
+                      alt="Gallery" 
+                      style={{
+                        ...styles.previewImg,
+                        border: '2px solid transparent',
+                        padding: '2px',
+                        borderRadius: '8px'
+                      }} 
+                    />
+                  </div>
+                  {hoverImageIndex === i && (
+                    <span style={{ fontSize: '12px', color: '#7B1E1E', fontWeight: '500' }}>Hover Image</span>
+                  )}
+                </div>
               ))}
             </div>
           </div>

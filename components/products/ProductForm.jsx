@@ -24,7 +24,7 @@ export default function ProductForm({ initialData = null }) {
     metaKeywords: "", refundPolicyEnabled: false, refundPolicyRefundWindow: 7,
     refundPolicyDescription: "", refundPolicyReasonRequired: true,
     refundPolicyShippingResponsibility: "Customer", refundPolicyRequiredCondition: "Unused",
-    variants: []
+    variants: [{ size: "", price: "", discountPrice: "", stock: "" }], hoverImageIndex: 0, existingImages: []
   });
 
   const [thumbnailFile, setThumbnailFile] = useState(null);
@@ -47,7 +47,16 @@ export default function ProductForm({ initialData = null }) {
         refundPolicyReasonRequired: initialData.refundPolicy?.reasonRequired ?? true,
         refundPolicyShippingResponsibility: initialData.refundPolicy?.shippingResponsibility || "Customer",
         refundPolicyRequiredCondition: initialData.refundPolicy?.requiredCondition || "Unused",
-        variants: initialData.variants || [],
+        variants: initialData.variants?.length > 0 
+          ? initialData.variants 
+          : [{ 
+              size: initialData.size || "Standard", 
+              price: initialData.price || "", 
+              discountPrice: initialData.discountPrice || "", 
+              stock: initialData.stock || "" 
+            }],
+        hoverImageIndex: initialData.hoverImageIndex || 0,
+        existingImages: (initialData.images || []).filter(img => img.path !== initialData.thumbnail?.path),
       });
     }
   }, [initialData]);
@@ -57,15 +66,28 @@ export default function ProductForm({ initialData = null }) {
     setFormData(prev => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const handleThumbnailChange = (e) => e.target.files?.[0] && setThumbnailFile(e.target.files[0]);
+  const handleThumbnailChange = (e) => {
+    if (e.target.files?.[0]) {
+      const newThumb = e.target.files[0];
+      setThumbnailFile(newThumb);
+      setGalleryFiles(prev => prev.filter(f => !(f.name === newThumb.name && f.size === newThumb.size)));
+    }
+  };
   
   const handleGalleryChange = (e) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      setGalleryFiles(prev => [...prev, ...newFiles].slice(0, 20)); // max 20 images
+      setGalleryFiles(prev => {
+        const uniqueNewFiles = newFiles.filter(newFile => 
+          !prev.some(prevFile => prevFile.name === newFile.name && prevFile.size === newFile.size) &&
+          !(thumbnailFile && thumbnailFile.name === newFile.name && thumbnailFile.size === newFile.size)
+        );
+        return [...prev, ...uniqueNewFiles].slice(0, 20);
+      }); // max 20 images
     }
   };
   const removeGalleryFile = (index) => setGalleryFiles(prev => prev.filter((_, i) => i !== index));
+  const removeExistingImage = (index) => setFormData(prev => ({ ...prev, existingImages: prev.existingImages.filter((_, i) => i !== index) }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,6 +103,10 @@ export default function ProductForm({ initialData = null }) {
         }
         if (key === "variants") {
           submitData.append("variants", JSON.stringify(formData.variants));
+          return;
+        }
+        if (key === "existingImages") {
+          submitData.append("keptImagePaths", JSON.stringify(formData.existingImages.map(img => img.path)));
           return;
         }
         if (typeof formData[key] === "boolean") submitData.append(key, formData[key]);
@@ -128,8 +154,11 @@ export default function ProductForm({ initialData = null }) {
           <BasicInfo formData={formData} handleChange={handleChange} />
           <MediaUpload 
             isEditing={isEditing} initialData={initialData}
+            existingImages={formData.existingImages} removeExistingImage={removeExistingImage}
             thumbnailFile={thumbnailFile} handleThumbnailChange={handleThumbnailChange}
             galleryFiles={galleryFiles} handleGalleryChange={handleGalleryChange} removeGalleryFile={removeGalleryFile}
+            hoverImageIndex={formData.hoverImageIndex}
+            setHoverImageIndex={(idx) => setFormData(prev => ({ ...prev, hoverImageIndex: idx }))}
           />
           <PricingInventory formData={formData} setFormData={setFormData} handleChange={handleChange} />
           <ProductSpecs formData={formData} handleChange={handleChange} />
