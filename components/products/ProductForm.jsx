@@ -134,14 +134,18 @@ export default function ProductForm({ initialData = null }) {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to save product");
+        let errorMsg = errorData.message || "Failed to save product";
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          errorMsg += "\\n" + errorData.errors.map(err => `- ${err.msg}`).join("\\n");
+        }
+        throw new Error(errorMsg);
       }
       
       alert("Product saved successfully!");
       router.push("/products");
     } catch (err) {
       console.error(err);
-      alert("Error saving product: " + err.message);
+      alert("Error saving product:\\n" + err.message);
       setError(err.message);
     } finally {
       setIsLoading(false);
