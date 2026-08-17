@@ -136,7 +136,7 @@ export default function ProductForm({ initialData = null }) {
         const errorData = await res.json();
         let errorMsg = errorData.message || "Failed to save product";
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          errorMsg += "\\n" + errorData.errors.map(err => `- ${err.msg}`).join("\\n");
+          errorMsg += "\\n" + errorData.errors.map(err => `- ${typeof err === 'string' ? err : err.msg}`).join("\\n");
         }
         throw new Error(errorMsg);
       }
