@@ -110,7 +110,7 @@ export default function ProductForm({ initialData = null }) {
           return;
         }
         if (typeof formData[key] === "boolean") submitData.append(key, formData[key]);
-        else if (formData[key] !== "" && formData[key] !== null && formData[key] !== undefined) submitData.append(key, formData[key]);
+        else if (formData[key] !== null && formData[key] !== undefined) submitData.append(key, formData[key]);
       });
 
       if (formData.metaKeywords) {
