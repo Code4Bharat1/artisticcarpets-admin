@@ -17,14 +17,14 @@ export default function ProductForm({ initialData = null }) {
 
   const [formData, setFormData] = useState({
     title: "", description: "", category: "",
-    subCategory: "", productCollection: "", price: "", discountPrice: "",
-    sku: "", stock: "", material: "", size: "", shape: "", color: "",
-    style: "", room: "", origin: "", weavingType: "", pileHeight: "",
+    price: "", discountPrice: "", sku: "", stock: "", color: "",
+    style: "", room: "", origin: "India", pileHeight: "",
     weight: "", isFeatured: false, isTrending: false, isBestSeller: false,
     isNewArrival: false, status: "active", metaTitle: "", metaDescription: "",
     metaKeywords: "", refundPolicyEnabled: false, refundPolicyRefundWindow: 7,
     refundPolicyDescription: "", refundPolicyReasonRequired: true,
     refundPolicyShippingResponsibility: "Customer", refundPolicyRequiredCondition: "Unused",
+    variants: []
   });
 
   const [thumbnailFile, setThumbnailFile] = useState(null);
@@ -47,6 +47,7 @@ export default function ProductForm({ initialData = null }) {
         refundPolicyReasonRequired: initialData.refundPolicy?.reasonRequired ?? true,
         refundPolicyShippingResponsibility: initialData.refundPolicy?.shippingResponsibility || "Customer",
         refundPolicyRequiredCondition: initialData.refundPolicy?.requiredCondition || "Unused",
+        variants: initialData.variants || [],
       });
     }
   }, [initialData]);
@@ -73,6 +74,15 @@ export default function ProductForm({ initialData = null }) {
       const token = localStorage.getItem("artistic_carpets_admin_token");
       const submitData = new FormData();
       Object.keys(formData).forEach(key => {
+        if (key === "newCategory") return; // handled below
+        if (key === "category" && formData.category === "add_new") {
+          submitData.append("category", formData.newCategory);
+          return;
+        }
+        if (key === "variants") {
+          submitData.append("variants", JSON.stringify(formData.variants));
+          return;
+        }
         if (typeof formData[key] === "boolean") submitData.append(key, formData[key]);
         else if (formData[key] !== "" && formData[key] !== null && formData[key] !== undefined) submitData.append(key, formData[key]);
       });
@@ -121,7 +131,7 @@ export default function ProductForm({ initialData = null }) {
             thumbnailFile={thumbnailFile} handleThumbnailChange={handleThumbnailChange}
             galleryFiles={galleryFiles} handleGalleryChange={handleGalleryChange} removeGalleryFile={removeGalleryFile}
           />
-          <PricingInventory formData={formData} handleChange={handleChange} />
+          <PricingInventory formData={formData} setFormData={setFormData} handleChange={handleChange} />
           <ProductSpecs formData={formData} handleChange={handleChange} />
         </div>
   

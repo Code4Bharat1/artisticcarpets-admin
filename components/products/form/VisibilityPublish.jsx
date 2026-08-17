@@ -28,7 +28,7 @@ export default function VisibilityPublish({ formData, handleChange, isEditing, i
         <h3 style={styles.cardTitle}>Organization</h3>
         <div style={styles.formGroup}>
           <label style={styles.label}>Category *</label>
-          <select required name="category" value={formData.category} onChange={handleChange} style={styles.input}>
+          <select required name="category" value={formData.category === "add_new" ? "" : formData.category} onChange={handleChange} style={styles.input}>
             <option value="" disabled>Select a category</option>
             <option value="Tibettan Animal Skin Rugs">Tibettan Animal Skin Rugs</option>
             <option value="PERSIAN RUG">PERSIAN RUG</option>
@@ -36,14 +36,38 @@ export default function VisibilityPublish({ formData, handleChange, isEditing, i
             <option value="Modern Flower Rugs">Modern Flower Rugs</option>
             <option value="Animal Rectangle Rugs">Animal Rectangle Rugs</option>
           </select>
-        </div>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Sub Category</label>
-          <input type="text" name="subCategory" value={formData.subCategory} onChange={handleChange} style={styles.input} />
-        </div>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Collection</label>
-          <input type="text" name="productCollection" value={formData.productCollection} onChange={handleChange} style={styles.input} placeholder="e.g. Persian Rugs" />
+          {formData.category !== "add_new" && (
+            <button 
+              type="button" 
+              onClick={() => handleChange({ target: { name: "category", value: "add_new" } })}
+              style={styles.actionBtn}
+            >
+              + Add Category
+            </button>
+          )}
+          {formData.category === "add_new" && (
+            <div style={{ marginTop: "12px" }}>
+              <input 
+                type="text" 
+                name="newCategory" 
+                value={formData.newCategory || ""} 
+                onChange={handleChange} 
+                style={styles.input} 
+                placeholder="Enter new category name" 
+                required 
+              />
+              <button 
+                type="button" 
+                onClick={() => {
+                  handleChange({ target: { name: "category", value: "" } });
+                  handleChange({ target: { name: "newCategory", value: "" } });
+                }}
+                style={styles.cancelBtn}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
