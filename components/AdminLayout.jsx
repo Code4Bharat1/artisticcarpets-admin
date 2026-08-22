@@ -59,7 +59,7 @@ export default function AdminLayout({ children }) {
     return "Admin Dashboard";
   };
 
-  const hideTitleOnMobile = pathname === "/orders" || pathname.startsWith("/products") || pathname.startsWith("/inventory") || pathname.startsWith("/complaints") || pathname === "/cms";
+  const hideTitleOnMobile = pathname === "/orders" || pathname.startsWith("/products") || pathname.startsWith("/complaints") || pathname === "/cms";
 
   return (
     <div className="admin-layout">

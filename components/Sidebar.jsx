@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, ShoppingBag, FileText, LogOut, Package, HelpCircle, RefreshCw, AlertTriangle, Warehouse, Image } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, FileText, LogOut, Package, HelpCircle, RefreshCw, AlertTriangle, Image } from "lucide-react";
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const pathname = usePathname();
@@ -28,7 +28,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { href: "/orders", label: "Orders", icon: ShoppingBag },
     { href: "/products", label: "Products", icon: Package },
     { href: "/gallery", label: "Gallery", icon: Image },
-    { href: "/inventory", label: "Inventory", icon: Warehouse },
+
     { href: "/complaints", label: "Support", icon: HelpCircle },
     { href: "/cms", label: "CMS Editor", icon: FileText },
   ];

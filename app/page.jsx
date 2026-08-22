@@ -172,32 +172,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Section 9: Inventory Overview */}
-            <div className="card-luxury">
-              <h3 className="card-title">Inventory Overview</h3>
-              <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
-                    <span>In Stock</span>
-                    <span style={{ fontWeight: "600" }}>{data.inventoryOverview.inStockPercent}%</span>
-                  </div>
-                  <div className="progress-container"><div className="progress-fill" style={{ width: `${data.inventoryOverview.inStockPercent}%`, background: "var(--color-success)" }}></div></div>
-                </div>
-                <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
-                    <span>Low Stock</span>
-                    <span style={{ fontWeight: "600" }}>{data.inventoryOverview.lowStockPercent}%</span>
-                  </div>
-                  <div className="progress-container"><div className="progress-fill" style={{ width: `${data.inventoryOverview.lowStockPercent}%`, background: "var(--color-warning)" }}></div></div>
-                </div>
-                <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
-                    <span>Out of Stock</span>
-                    <span style={{ fontWeight: "600" }}>{data.inventoryOverview.outOfStockPercent}%</span>
-                  </div>
-                  <div className="progress-container"><div className="progress-fill" style={{ width: `${data.inventoryOverview.outOfStockPercent}%`, background: "var(--color-danger)" }}></div></div>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
 

@@ -43,7 +43,7 @@ export default function ComplaintsPage() {
       c.ticketId.toLowerCase().includes(search.toLowerCase()) ||
       c.issueType.toLowerCase().includes(search.toLowerCase()) ||
       c.orderId.toLowerCase().includes(search.toLowerCase()) ||
-      (c.user?.name && c.user.name.toLowerCase().includes(search.toLowerCase()))
+      (c.user && (`${c.user.firstName || ''} ${c.user.lastName || ''}`.toLowerCase().includes(search.toLowerCase())))
   );
  
   return (
@@ -111,7 +111,7 @@ export default function ComplaintsPage() {
                     <strong>{c.ticketId}</strong>
                   </td>
                   <td>
-                    {c.user?.name || "Unknown"}
+                    {c.user ? (`${c.user.firstName || ''} ${c.user.lastName || ''}`.trim() || "Unknown") : "Unknown"}
                     <br />
                     <span style={{ fontSize: "12px", color: "#666" }}>
                       {c.user?.email}
